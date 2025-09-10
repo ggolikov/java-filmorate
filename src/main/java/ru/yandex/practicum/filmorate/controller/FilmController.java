@@ -4,13 +4,14 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
+import java.time.LocalDate;
 import java.util.*;
 
 @Slf4j
 @RestController
 @RequestMapping("/films")
 public class FilmController {
-    public static final Date MIN_FILM_DATE = new Date(1895, Calendar.DECEMBER, 28);
+    public static final LocalDate MIN_FILM_DATE = LocalDate.of(1895, 12, 28);
 
     public static void validate(Film film) throws ValidationException {
         if (film.getName() == null || film.getName().isBlank()) {
@@ -20,11 +21,11 @@ public class FilmController {
             throw new ValidationException("Описание фильма не может быть длиннее 200 символов");
         }
 
-        if (film.getReleaseDate().before(MIN_FILM_DATE)) {
+        if (film.getReleaseDate().isBefore(MIN_FILM_DATE)) {
             throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года");
         }
 
-        if (film.getDuration().isNegative()) {
+        if (film.getDuration() < 0) {
             throw new ValidationException("Продолжительность фильма должна быть положительным числом");
         }
     }
@@ -42,6 +43,13 @@ public class FilmController {
 
     @PutMapping
     public Film updateFilm(@RequestBody Film film) {
+        if (!films.containsKey(film.getId())) {
+            throw new ValidationException("Фильм с id" + film.getId()  + "не найден");
+        }
+
+        validate(film);
+
+        films.put(film.getId(), film);
         return film;
     }
 

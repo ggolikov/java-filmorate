@@ -5,7 +5,7 @@ import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -20,7 +20,7 @@ public class UserValidationTests {
         user.setEmail("user@user.com");
         user.setLogin("user");
         user.setName("name");
-        user.setBirthday(new Date());
+        user.setBirthday(LocalDate.now());
     }
 
     @Test
@@ -84,7 +84,7 @@ public class UserValidationTests {
         ValidationException exception = assertThrows(
                 ValidationException.class,
                 () -> {
-                    user.setBirthday(new Date(2100, 1, 1));
+                    user.setBirthday(LocalDate.of(2100, 1, 1));
 
                     UserController.validate(user);
                 }
