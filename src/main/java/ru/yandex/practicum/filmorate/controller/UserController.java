@@ -1,4 +1,5 @@
 package ru.yandex.practicum.filmorate.controller;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
@@ -13,32 +14,10 @@ import java.util.Map;
 @RestController
 @RequestMapping("/users")
 public class UserController {
-    public static void validate(User user) throws ValidationException {
-        if (user.getEmail() == null || user.getEmail().isBlank()) {
-            throw new ValidationException("Электронная почта не может быть пустой");
-        }
-
-        if (!user.getEmail().contains("@")) {
-            throw new ValidationException("Электронная почта должна содержать символ @");
-        }
-
-        if (user.getLogin() == null || user.getLogin().isBlank()) {
-            throw new ValidationException("Логин не может быть пустым");
-        }
-
-        if (user.getLogin().contains(" ")) {
-            throw new ValidationException("Логин не может содержать пробелы");
-        }
-
-        if (user.getBirthday().isAfter(LocalDate.now())) {
-            throw new ValidationException("Дата рождения не может быть в будущем");
-        }
-    }
-
     private final Map<Integer, User> users = new HashMap<>();
 
     @PostMapping
-    public User addUser(@RequestBody User user) {
+    public User addUser(@RequestBody @Valid User user) {
         validate(user);
 
         if (user.getName() == null || user.getName().isBlank()) {
@@ -52,7 +31,7 @@ public class UserController {
     }
 
     @PutMapping
-    public User updateUser(@RequestBody User user) {
+    public User updateUser(@RequestBody @Valid User user) {
         if (!users.containsKey(user.getId())) {
             throw new ValidationException("Пользователь с id" + user.getId()  + "не найден");
         }
@@ -71,6 +50,28 @@ public class UserController {
     @GetMapping
     public Collection<User> getUsers() {
         return users.values();
+    }
+
+    public void validate(User user) throws ValidationException {
+        if (user.getEmail() == null || user.getEmail().isBlank()) {
+            throw new ValidationException("Поле email не может быть пустым или null");
+        }
+
+        if (!user.getEmail().contains("@") || user.getEmail().startsWith("@") || user.getEmail().endsWith("@")) {
+            throw new ValidationException("Указан некорректный формат почты");
+        }
+
+        if (user.getLogin() == null || user.getLogin().isBlank()) {
+            throw new ValidationException("Поле login не может быть пустым или null");
+        }
+
+        if (user.getLogin().contains(" ")) {
+            throw new ValidationException("Поле login не может содержать пробелы");
+        }
+
+        if (user.getBirthday().isAfter(LocalDate.now())) {
+            throw new ValidationException("Дата рождения не может быть в будущем");
+        }
     }
 
     private int getNextId() {

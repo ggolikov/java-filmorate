@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class UserValidationTests {
+    UserController userController  = new UserController();
     User user;
 
     @BeforeEach
@@ -30,11 +31,11 @@ public class UserValidationTests {
                 () -> {
                     user.setEmail("");
 
-                    UserController.validate(user);
+                    userController.validate(user);
                 }
         );
 
-        assertEquals("Электронная почта не может быть пустой", exception.getMessage());
+        assertEquals("Поле email не может быть пустым или null", exception.getMessage());
     }
 
     @Test
@@ -44,11 +45,11 @@ public class UserValidationTests {
                 () -> {
                     user.setEmail("user.com");
 
-                    UserController.validate(user);
+                    userController.validate(user);
                 }
         );
 
-        assertEquals("Электронная почта должна содержать символ @", exception.getMessage());
+        assertEquals("Указан некорректный формат почты", exception.getMessage());
     }
 
     @Test
@@ -58,11 +59,11 @@ public class UserValidationTests {
                 () -> {
                     user.setLogin("");
 
-                    UserController.validate(user);
+                    userController.validate(user);
                 }
         );
 
-        assertEquals("Логин не может быть пустым", exception.getMessage());
+        assertEquals("Поле login не может быть пустым или null", exception.getMessage());
     }
 
     @Test
@@ -72,11 +73,11 @@ public class UserValidationTests {
                 () -> {
                     user.setLogin("user user");
 
-                    UserController.validate(user);
+                    userController.validate(user);
                 }
         );
 
-        assertEquals("Логин не может содержать пробелы", exception.getMessage());
+        assertEquals("Поле login не может содержать пробелы", exception.getMessage());
     }
 
     @Test
@@ -86,7 +87,7 @@ public class UserValidationTests {
                 () -> {
                     user.setBirthday(LocalDate.of(2100, 1, 1));
 
-                    UserController.validate(user);
+                    userController.validate(user);
                 }
         );
 

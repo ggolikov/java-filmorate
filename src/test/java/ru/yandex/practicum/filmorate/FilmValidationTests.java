@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class FilmValidationTests {
+    FilmController filmController = new FilmController();
     Film film;
 
     @BeforeEach
@@ -29,11 +30,11 @@ public class FilmValidationTests {
                 () -> {
                     film.setName("");
 
-                    FilmController.validate(film);
+                    filmController.validate(film);
                 }
         );
 
-        assertEquals("Название фильма не может быть пустым", exception.getMessage());
+        assertEquals("Поле name не может быть пустым или null", exception.getMessage());
     }
 
     @Test
@@ -44,11 +45,11 @@ public class FilmValidationTests {
                     String description = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec qu1";
                     film.setDescription(description);
 
-                    FilmController.validate(film);
+                    filmController.validate(film);
                 }
         );
 
-        assertEquals("Описание фильма не может быть длиннее 200 символов", exception.getMessage());
+        assertEquals("Длина поля description не должна превышать 200 символов", exception.getMessage());
     }
 
     @Test
@@ -58,7 +59,7 @@ public class FilmValidationTests {
                 () -> {
                     film.setReleaseDate(LocalDate.of(1800, 1, 1));
 
-                    FilmController.validate(film);
+                    filmController.validate(film);
                 }
         );
 
@@ -72,7 +73,7 @@ public class FilmValidationTests {
                 () -> {
                     film.setDuration(-100);
 
-                    FilmController.validate(film);
+                    filmController.validate(film);
                 }
         );
 
