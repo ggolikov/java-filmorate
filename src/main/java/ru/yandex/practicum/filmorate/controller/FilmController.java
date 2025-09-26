@@ -11,24 +11,46 @@ import java.util.*;
 @RestController
 @RequestMapping("/films")
 public class FilmController {
+    private final String DEFAULT_LIKES_COUNT = "10";
+
     private final FilmService filmService;
     @Autowired
     public FilmController(FilmService filmService) {
         this.filmService = filmService;
     }
 
+    @GetMapping("/films/{filmId}")
+    public Film getFilm(@PathVariable int filmId) {
+        return filmService.getFilm(filmId);
+    }
+
     @PostMapping
     public Film addFilm(@RequestBody @Valid Film film) {
-        return this.filmService.addFilm(film);
+        return filmService.addFilm(film);
     }
 
     @PutMapping
     public Film updateFilm(@RequestBody @Valid Film film) {
-        return this.filmService.updateFilm(film);
+        return filmService.updateFilm(film);
     }
 
     @GetMapping
     public Collection<Film> getFilms() {
-        return this.filmService.getFilms();
+        return filmService.getFilms();
+    }
+
+    @PutMapping("/{id}/like/{userId}")
+    public void likeFilm(@PathVariable int id, @PathVariable int userId) {
+        filmService.addLike(id, userId);
+    }
+
+    @DeleteMapping("/{id}/like/{userId}")
+    public void unlikeFilm(@PathVariable int id, @PathVariable int userId) {
+        filmService.removeLike(id, userId);
+    }
+
+    @GetMapping("/popular")
+    public Collection<Film> getPopularFilms(@RequestParam(value = "count", required = false, defaultValue = DEFAULT_LIKES_COUNT) int count) {
+        return filmService.getMostLikedFilms(count);
     }
 }

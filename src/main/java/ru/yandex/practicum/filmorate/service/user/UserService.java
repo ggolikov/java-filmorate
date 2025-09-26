@@ -18,6 +18,10 @@ public class UserService {
         this.userStorage = userStorage;
     }
 
+    public User getUser(int userId) {
+        return userStorage.getUser(userId);
+    }
+
     public User addUser(@Valid User user) {
         return userStorage.addUser(user);
     };
@@ -34,8 +38,9 @@ public class UserService {
         return userStorage.getUsers();
     }
 
-    public void addFriend(int userId, int friendId) {
-        User user = userStorage.getUser(userId);
+    public void addFriend(int id, int friendId) {
+        User user = userStorage.getUser(id);
+
         if (user != null) {
             User friend = userStorage.getUser(friendId);
             if (friend != null) {
@@ -43,13 +48,14 @@ public class UserService {
                 userFriends.add(friendId);
                 // Пока пользователям не надо одобрять заявки в друзья — добавляем сразу.
                 Set<Integer> friendFriends = friend.getFriends();
-                friendFriends.add(userId);
+                friendFriends.add(id);
             }
         }
     }
 
-    public void removeFriend(int userId, int friendId) {
-        User user = userStorage.getUser(userId);
+    public void removeFriend(int id, int friendId) {
+        User user = userStorage.getUser(id);
+
         if (user != null) {
             User friend = userStorage.getUser(friendId);
             if (friend != null) {
@@ -59,12 +65,32 @@ public class UserService {
         }
     }
 
-    public Collection<User> getCommonFriends(int user1Id, int user2Id) {
-        User user1 = userStorage.getUser(user1Id);
-        User user2 = userStorage.getUser(user2Id);
-        if (user1 != null && user2 != null) {
-            Set<Integer> user1Friends = user1.getFriends();
-            Set<Integer> user2Friends = user2.getFriends();
+    public Collection<User> getFriends(int id) {
+        User user = userStorage.getUser(id);
+
+        if (user != null) {
+            Set<Integer> userFriendsIds = user.getFriends();
+
+            HashMap<Integer, User> friends = new HashMap<>();
+
+            for (Integer userId : userFriendsIds) {
+                User u = userStorage.getUser(userId);
+                friends.put(userId, u);
+            }
+
+            return friends.values();
+        }
+
+        return new HashSet<>();
+    }
+
+    public Collection<User> getCommonFriends(int id, int otherId) {
+        User user = userStorage.getUser(id);
+        User otherUser = userStorage.getUser(otherId);
+
+        if (user != null && otherUser != null) {
+            Set<Integer> user1Friends = user.getFriends();
+            Set<Integer> user2Friends = otherUser.getFriends();
 
             Set<Integer> intersection = new HashSet<>(user1Friends);
 
@@ -73,8 +99,8 @@ public class UserService {
             HashMap<Integer, User> commonUsers = new HashMap<>();
 
             for (Integer userId : intersection) {
-                User user = userStorage.getUser(userId);
-                commonUsers.put(userId, user);
+                User u = userStorage.getUser(userId);
+                commonUsers.put(userId, u);
             }
 
             return commonUsers.values();
