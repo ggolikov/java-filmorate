@@ -28,7 +28,7 @@ public class FilmService {
 
     public Film addFilm(@Valid Film film) {
         return filmStorage.addFilm(film);
-    };
+    }
 
     public Film updateFilm(@Valid Film film) {
         return filmStorage.updateFilm(film);
