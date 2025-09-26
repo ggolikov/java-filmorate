@@ -1,9 +1,10 @@
 package ru.yandex.practicum.filmorate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 
@@ -11,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class UserValidationTests {
-    UserController userController  = new UserController();
+    UserStorage userStorage  = new InMemoryUserStorage();
     User user;
 
     @BeforeEach
@@ -31,7 +32,7 @@ public class UserValidationTests {
                 () -> {
                     user.setEmail("");
 
-                    userController.validate(user);
+                    userStorage.validate(user);
                 }
         );
 
@@ -45,7 +46,7 @@ public class UserValidationTests {
                 () -> {
                     user.setEmail("user.com");
 
-                    userController.validate(user);
+                    userStorage.validate(user);
                 }
         );
 
@@ -59,7 +60,7 @@ public class UserValidationTests {
                 () -> {
                     user.setLogin("");
 
-                    userController.validate(user);
+                    userStorage.validate(user);
                 }
         );
 
@@ -73,7 +74,7 @@ public class UserValidationTests {
                 () -> {
                     user.setLogin("user user");
 
-                    userController.validate(user);
+                    userStorage.validate(user);
                 }
         );
 
@@ -87,7 +88,7 @@ public class UserValidationTests {
                 () -> {
                     user.setBirthday(LocalDate.of(2100, 1, 1));
 
-                    userController.validate(user);
+                    userStorage.validate(user);
                 }
         );
 
