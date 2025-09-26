@@ -11,9 +11,10 @@ import java.util.*;
 @RestController
 @RequestMapping("/films")
 public class FilmController {
-    private final String DEFAULT_LIKES_COUNT = "10";
+    private final String defaultLikesCount = "10";
 
     private final FilmService filmService;
+
     @Autowired
     public FilmController(FilmService filmService) {
         this.filmService = filmService;
@@ -50,7 +51,7 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public Collection<Film> getPopularFilms(@RequestParam(value = "count", required = false, defaultValue = DEFAULT_LIKES_COUNT) int count) {
+    public Collection<Film> getPopularFilms(@RequestParam(value = "count", required = false, defaultValue = defaultLikesCount) int count) {
         return filmService.getMostLikedFilms(count);
     }
 }
