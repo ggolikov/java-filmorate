@@ -24,7 +24,7 @@ public class UserService {
 
     public User addUser(@Valid User user) {
         return userStorage.addUser(user);
-    };
+    }
 
     public User updateUser(@Valid User user) {
         return userStorage.updateUser(user);
