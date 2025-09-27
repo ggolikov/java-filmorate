@@ -61,6 +61,8 @@ public class UserService {
             if (friend != null) {
                 Set<Integer> userFriends = user.getFriends();
                 userFriends.remove(friendId);
+                Set<Integer> friendFriends = friend.getFriends();
+                friendFriends.remove(id);
             }
         }
     }

@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -77,7 +78,8 @@ public class InMemoryFilmStorage implements FilmStorage {
     private int getNextId() {
         int currentMaxId = films.keySet()
                 .stream()
-                .max((a, b) -> b.compareTo(a))
+                .mapToInt(Integer::intValue)
+                .max()
                 .orElse(0);
         return ++currentMaxId;
     }
