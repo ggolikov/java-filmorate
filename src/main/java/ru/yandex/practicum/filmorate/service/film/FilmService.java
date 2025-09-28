@@ -1,5 +1,4 @@
 package ru.yandex.practicum.filmorate.service.film;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -27,11 +26,11 @@ public class FilmService {
         return filmStorage.getFilm(filmId);
     }
 
-    public Film addFilm(@Valid Film film) {
+    public Film addFilm(Film film) {
         return filmStorage.addFilm(film);
     }
 
-    public Film updateFilm(@Valid Film film) {
+    public Film updateFilm(Film film) {
         return filmStorage.updateFilm(film);
     }
 

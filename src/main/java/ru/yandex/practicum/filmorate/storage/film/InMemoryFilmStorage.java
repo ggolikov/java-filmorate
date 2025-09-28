@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
-import jakarta.validation.Valid;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
@@ -27,7 +26,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         return film;
     }
 
-    public Film addFilm(@Valid Film film) {
+    public Film addFilm(Film film) {
         validate(film);
 
         film.setId(getNextId());
@@ -35,7 +34,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         return film;
     }
 
-    public Film updateFilm(@Valid Film film) {
+    public Film updateFilm(Film film) {
         if (!films.containsKey(film.getId())) {
             throw new NotFoundException("Фильм с id" + film.getId()  + "не найден");
         }

@@ -1,32 +1,26 @@
 package ru.yandex.practicum.filmorate.service.user;
 
-import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
     private final UserStorage userStorage;
-
-    public UserService(UserStorage userStorage) {
-        this.userStorage = userStorage;
-    }
 
     public User getUser(int userId) {
         return userStorage.getUser(userId);
     }
 
-    public User addUser(@Valid User user) {
+    public User addUser(User user) {
         return userStorage.addUser(user);
     }
 
-    public User updateUser(@Valid User user) {
+    public User updateUser(User user) {
         return userStorage.updateUser(user);
     }
 
@@ -39,6 +33,10 @@ public class UserService {
     }
 
     public void addFriend(int id, int friendId) {
+        if (id == friendId) {
+            return;
+        }
+
         User user = userStorage.getUser(id);
 
         if (user != null) {
@@ -73,17 +71,17 @@ public class UserService {
         if (user != null) {
             Set<Integer> userFriendsIds = user.getFriends();
 
-            HashMap<Integer, User> friends = new HashMap<>();
+            ArrayList<User> friends = new ArrayList<>();
 
             for (Integer userId : userFriendsIds) {
                 User u = userStorage.getUser(userId);
-                friends.put(userId, u);
+                friends.add(u);
             }
 
-            return friends.values();
+            return friends;
         }
 
-        return new HashSet<>();
+        return new ArrayList<>();
     }
 
     public Collection<User> getCommonFriends(int id, int otherId) {
@@ -98,16 +96,16 @@ public class UserService {
 
             intersection.retainAll(user2Friends);
 
-            HashMap<Integer, User> commonUsers = new HashMap<>();
+            ArrayList<User> commonUsers = new ArrayList<>();
 
             for (Integer userId : intersection) {
                 User u = userStorage.getUser(userId);
-                commonUsers.put(userId, u);
+                commonUsers.add(u);
             }
 
-            return commonUsers.values();
+            return commonUsers;
         }
 
-        return new HashSet<>();
+        return new ArrayList<>();
     }
 }
