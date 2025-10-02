@@ -1,9 +1,10 @@
 package ru.yandex.practicum.filmorate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 
 import java.time.LocalDate;
 
@@ -11,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class FilmValidationTests {
-    FilmController filmController = new FilmController();
+    FilmStorage filmStorage = new InMemoryFilmStorage();
     Film film;
 
     @BeforeEach
@@ -30,7 +31,7 @@ public class FilmValidationTests {
                 () -> {
                     film.setName("");
 
-                    filmController.validate(film);
+                    filmStorage.validate(film);
                 }
         );
 
@@ -45,7 +46,7 @@ public class FilmValidationTests {
                     String description = "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec qu1";
                     film.setDescription(description);
 
-                    filmController.validate(film);
+                    filmStorage.validate(film);
                 }
         );
 
@@ -59,7 +60,7 @@ public class FilmValidationTests {
                 () -> {
                     film.setReleaseDate(LocalDate.of(1800, 1, 1));
 
-                    filmController.validate(film);
+                    filmStorage.validate(film);
                 }
         );
 
@@ -73,7 +74,7 @@ public class FilmValidationTests {
                 () -> {
                     film.setDuration(-100);
 
-                    filmController.validate(film);
+                    filmStorage.validate(film);
                 }
         );
 
