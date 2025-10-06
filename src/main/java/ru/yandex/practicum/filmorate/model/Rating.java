@@ -1,9 +1,11 @@
 package ru.yandex.practicum.filmorate.model;
 
-public enum Rating {
-    G,
-    PG,
-    PG_13,
-    R,
-    NC_17
+import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
+
+@Data
+public class Rating {
+    private int id;
+    @NotBlank(message = "Поле name не может быть пустым или null")
+    private String name;
 }

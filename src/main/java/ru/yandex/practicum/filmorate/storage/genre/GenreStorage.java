@@ -1,0 +1,14 @@
+package ru.yandex.practicum.filmorate.storage.genre;
+
+import jakarta.validation.Valid;
+import ru.yandex.practicum.filmorate.model.Genre;
+
+import java.util.Collection;
+
+public interface GenreStorage {
+    Genre addGenre(@Valid Genre genre);
+
+    Genre getGenre(int id);
+
+    Collection<Genre> getAllGenres();
+}
