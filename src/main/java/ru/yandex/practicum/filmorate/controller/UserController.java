@@ -3,6 +3,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.dto.UserDto;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.user.UserService;
 
@@ -16,7 +17,7 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/users/{userId}")
-    public User getUser(@PathVariable int userId) {
+    public UserDto getUser(@PathVariable int userId) {
         return userService.getUser(userId);
     }
 

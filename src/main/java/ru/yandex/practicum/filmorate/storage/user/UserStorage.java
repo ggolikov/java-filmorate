@@ -1,14 +1,14 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
 import jakarta.validation.Valid;
-import ru.yandex.practicum.filmorate.dto.UserDto;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.Collection;
+import java.util.Optional;
 
 public interface UserStorage {
-    User getUser(int id);
+    Optional<User> getUser(int id);
 
     User addUser(@Valid User user);
 
@@ -17,6 +17,12 @@ public interface UserStorage {
     void removeUser(int id);
 
     Collection<User> getUsers();
+
+    void addFriend(int id1, int id2, String status);
+
+    void removeFriend(int id, int friendId);
+
+    Collection<User> getFriends(int id);
 
     void validate(User user) throws ValidationException;
 }

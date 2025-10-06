@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -49,7 +50,7 @@ public class FilmService {
 
     public void addLike(int id, int userId) {
         Film film = filmStorage.getFilm(id);
-        User user = userStorage.getUser(userId);
+        Optional<User> user = userStorage.getUser(userId);
 
         if (film != null && user != null) {
             Set<Integer> likes = film.getLikes();
@@ -59,7 +60,7 @@ public class FilmService {
 
     public void removeLike(int id, int userId) {
         Film film = filmStorage.getFilm(id);
-        User user = userStorage.getUser(userId);
+        Optional<User> user = userStorage.getUser(userId);
 
         if (film != null && user != null) {
             Set<Integer> likes = film.getLikes();
