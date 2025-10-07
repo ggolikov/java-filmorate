@@ -18,7 +18,7 @@ import java.util.Optional;
 public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
     public static final LocalDate MIN_FILM_DATE = LocalDate.of(1895, 12, 28);
 
-    private static final String GET_FILM_QUERY = 
+    private static final String GET_FILM_QUERY =
             """
             SELECT
                     f.*, m.name as mpa_name,
@@ -32,7 +32,6 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
                                _fg.FILM_ID as film_id,
                                _g.name AS genre_name
                                 FROM FILMS_GENRES AS _fg
-            
                                 LEFT JOIN GENRES as _g ON _fg.GENRE_ID = _g.ID
                                ) AS fg
                     ON f.id = fg.film_id
@@ -55,7 +54,6 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
                                _fg.FILM_ID as film_id,
                                _g.name AS genre_name
                                 FROM FILMS_GENRES AS _fg
-            
                                 LEFT JOIN GENRES as _g ON _fg.GENRE_ID = _g.ID
                                ) AS fg
                     ON f.id = fg.film_id
