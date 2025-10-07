@@ -15,6 +15,7 @@ import java.util.List;
 @Service
 public class GenreService {
     private final GenreStorage genreStorage;
+
     @Autowired
     public GenreService(@Qualifier("genreDbStorage") GenreStorage genreStorage) {
         this.genreStorage = genreStorage;
