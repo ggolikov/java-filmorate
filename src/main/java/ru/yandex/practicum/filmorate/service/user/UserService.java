@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.service.user;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -8,8 +7,8 @@ import ru.yandex.practicum.filmorate.dto.UserDto;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.model.Friendship;
-import ru.yandex.practicum.filmorate.model.RelationStatus;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.friendship.FriendshipStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.*;
@@ -18,10 +17,12 @@ import java.util.stream.Collectors;
 @Service
 public class UserService {
     private final UserStorage userStorage;
+    private final FriendshipStorage friendshipStorage;
 
     @Autowired
-    public UserService(@Qualifier("userDbStorage") UserStorage userStorage) {
+    public UserService(@Qualifier("userDbStorage") UserStorage userStorage, @Qualifier("friendshipDbStorage") FriendshipStorage friendshipStorage) {
         this.userStorage = userStorage;
+        this.friendshipStorage = friendshipStorage;
     }
 
     public UserDto getUser(int userId) {
@@ -54,9 +55,11 @@ public class UserService {
         if (optionalUser.isPresent()) {
             Optional<User> optionalFriend = userStorage.getUser(friendId);
             if (optionalFriend.isPresent()) {
-                userStorage.addFriend(id, friendId, "CONFIRMED");
-                // Пока пользователям не надо одобрять заявки в друзья — добавляем сразу.
-                // userStorage.addFriend(friendId, id, "CONFIRMED");
+                Optional<Friendship> optionalFriendship = friendshipStorage.getFriendship(id, friendId);
+                if (optionalFriendship.isEmpty()) {
+                    friendshipStorage.addFriendship(id, friendId, "CONFIRMED");
+//                    friendshipStorage.addFriendship(friendId, id, "CONFIRMED");
+                }
             } else {
                 throw new NotFoundException("Пользователь не найден");
             }
@@ -72,8 +75,8 @@ public class UserService {
             Optional<User> optionalFriend = userStorage.getUser(friendId);
 
             if (optionalFriend.isPresent()) {
-                userStorage.removeFriend(id, friendId);
-                userStorage.removeFriend(friendId, id);
+                friendshipStorage.removeFriendship(id, friendId);
+//                friendshipStorage.removeFriendship(friendId, id);
             } else {
                 throw new NotFoundException("Пользователь не найден");
             }
@@ -99,8 +102,8 @@ public class UserService {
             User user = optionalUser.get();
             User otherUser = otherOptionalUser.get();
 
-            Set<Integer> user1Friends = user.getFriends().stream().map(Friendship::getFollowedUserId).collect(Collectors.toSet());
-            Set<Integer> user2Friends = otherUser.getFriends().stream().map(Friendship::getFollowedUserId).collect(Collectors.toSet());
+            Set<Integer> user1Friends = user.getFriends().stream().map(User::getId).collect(Collectors.toSet());
+            Set<Integer> user2Friends = otherUser.getFriends().stream().map(User::getId).collect(Collectors.toSet());
 
             Set<Integer> intersection = new HashSet<>(user1Friends);
 

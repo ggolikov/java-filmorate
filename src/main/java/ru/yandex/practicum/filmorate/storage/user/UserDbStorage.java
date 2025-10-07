@@ -17,34 +17,53 @@ import java.util.Optional;
 @Repository
 @Qualifier("userDbStorage")
 public class UserDbStorage extends BaseStorage<User> implements UserStorage {
-    private static final String GET_USER_QUERY = "SELECT * FROM users WHERE id = ?";
-    private static final String GET_ALL_USERS_QUERY = "SELECT * FROM users";
+    private static final String GET_USER_QUERY =
+        """
+            SELECT
+                u.*,
+                array_agg(f.followed_user_id) as friends
+            FROM users AS u
+                LEFT JOIN FRIENDSHIP as f
+                on f.FOLLOWING_USER_ID = u.ID
+            WHERE u.id = ?
+            GROUP BY u.id;
+        """;
+    private static final String GET_ALL_USERS_QUERY =
+        """
+            SELECT
+                u.*,
+                array_agg(f.followed_user_id) as friends
+            FROM users AS u
+                     LEFT JOIN FRIENDSHIP as f
+                               on f.FOLLOWING_USER_ID = u.ID
+            GROUP BY u.id;
+        """;
     private static final String INSERT_USER_QUERY = "INSERT INTO users(login, email, name, birthday)" +
             "VALUES (?, ?, ?, ?)";
     private static final String UPDATE_USER_QUERY = "UPDATE users SET login = ?, email = ?, name = ?, birthday = ? WHERE id = ?";
-    private static final String DELETE_USER_QUERY = "DELETE FROM users WHERE id = ?";
-    private static final String INSERT_FRIENDSHIP_QUERY = "INSERT INTO friendship(following_user_id, followed_user_id, status)" +
-            "VALUES (?, ?, ?)";
-    private static final String USER_FRIENDS_QUERY = "SELECT" +
-            "    ID,\n" +
-            "    LOGIN,\n" +
-            "    EMAIL,\n" +
-            "    NAME,\n" +
-            "    BIRTHDAY\n" +
-            "FROM USERS\n" +
-            "WHERE ID IN (\n" +
-            "SELECT DISTINCT\n" +
-            "    FOLLOWED_USER_ID\n" +
-            "    FROM FRIENDSHIP AS F\n" +
-            "    LEFT JOIN USERS AS U ON F.FOLLOWING_USER_ID = U.ID\n" +
-            "\n" +
-            "WHERE U.ID = ?\n" +
-            ");";
 
-    private static final String DELETE_USER_FRIEND_QUERY = "DELETE FROM friendship WHERE following_user_id = ? AND followed_user_id = ?";
+    private static final String DELETE_USER_QUERY = "DELETE FROM users WHERE id = ?";
+
+    private static final String USER_FRIENDS_QUERY =
+            """
+                SELECT
+                    u.*,
+                    array_agg(f.followed_user_id) as friends
+                    FROM users AS u
+                    LEFT JOIN FRIENDSHIP as f
+                    on f.FOLLOWING_USER_ID = u.ID
+                WHERE ID IN (
+                    SELECT DISTINCT
+                        FOLLOWED_USER_ID
+                        FROM FRIENDSHIP AS F
+                        LEFT JOIN USERS AS U ON F.FOLLOWING_USER_ID = U.ID
+                     WHERE U.ID = ?
+                )
+                GROUP BY u.id;
+            """;
 
     public UserDbStorage(JdbcTemplate jdbc, RowMapper<User> mapper) {
-        super(jdbc, mapper, User.class);
+        super(jdbc, mapper);
     }
 
     public Optional<User> getUser(int id) {
@@ -97,19 +116,6 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
 
     public Collection<User> getUsers() {
         return findMany(GET_ALL_USERS_QUERY);
-    }
-
-    public void addFriend(int id1, int id2, String status) {
-        update(
-                INSERT_FRIENDSHIP_QUERY,
-                id1,
-                id2,
-                status
-        );
-    }
-
-    public void removeFriend(int id, int friendId) {
-        delete(DELETE_USER_FRIEND_QUERY, id, friendId);
     }
 
     public Collection<User> getFriends(int id) {

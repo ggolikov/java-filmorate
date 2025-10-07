@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.storage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import ru.yandex.practicum.filmorate.exception.InternalServerException;
@@ -17,7 +16,6 @@ import java.util.Optional;
 public class BaseStorage<T> {
     protected final JdbcTemplate jdbc;
     protected final RowMapper<T> mapper;
-    private final Class<T> entityType;
 
     protected Optional<T> findOne(String query, Object... params) {
         try {
@@ -30,7 +28,6 @@ public class BaseStorage<T> {
 
     protected List<T> findMany(String query, Object... params) {
         return jdbc.query(query, mapper, params);
-//        return jdbc.queryForList(query, entityType, params);
     }
 
     public boolean delete(String query, Object... params) {

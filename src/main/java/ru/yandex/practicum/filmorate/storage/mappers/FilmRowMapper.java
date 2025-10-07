@@ -21,6 +21,7 @@ public class FilmRowMapper implements RowMapper<Film> {
         film.setDescription(rs.getString("description"));
         film.setReleaseDate(rs.getDate("release_date").toLocalDate());
         film.setDuration(rs.getInt("duration"));
+        film.setLikes(rs.getInt("likes_count"));
         Array genreIdsSqlArray = rs.getArray("genre_ids");
         Array genreNamessSqlArray = rs.getArray("genre_names");
         if (genreIdsSqlArray != null && genreNamessSqlArray != null) {

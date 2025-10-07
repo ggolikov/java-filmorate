@@ -16,7 +16,7 @@ public class GenreDbStorage extends BaseStorage<Genre> implements GenreStorage {
     private static final String GET_ALL_GENRES_QUERY = "SELECT * FROM genres";
 
     public GenreDbStorage(JdbcTemplate jdbc, RowMapper<Genre> mapper) {
-        super(jdbc, mapper, Genre.class);
+        super(jdbc, mapper);
     }
 
     public Optional<Genre> getGenre(int id) {

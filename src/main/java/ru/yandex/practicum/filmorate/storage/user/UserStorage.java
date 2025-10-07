@@ -18,10 +18,6 @@ public interface UserStorage {
 
     Collection<User> getUsers();
 
-    void addFriend(int id1, int id2, String status);
-
-    void removeFriend(int id, int friendId);
-
     Collection<User> getFriends(int id);
 
     void validate(User user) throws ValidationException;

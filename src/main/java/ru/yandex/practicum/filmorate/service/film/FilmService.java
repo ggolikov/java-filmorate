@@ -5,13 +5,11 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.filmGenre.FilmGenreStorage;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
+import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -25,6 +23,7 @@ public class FilmService {
     private final GenreStorage genreStorage;
     private final MpaStorage mpaStorage;
     private final FilmGenreStorage filmGenreStorage;
+    private final LikeStorage likeStorage;
 
     @Autowired
     public FilmService(
@@ -37,13 +36,16 @@ public class FilmService {
             @Qualifier("mpaDbStorage")
             MpaStorage mpaStorage,
             @Qualifier("filmGenreDbStorage")
-            FilmGenreStorage filmGenreStorage
+            FilmGenreStorage filmGenreStorage,
+            @Qualifier("likeDbStorage")
+            LikeStorage likeStorage
             ) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
         this.genreStorage = genreStorage;
         this.mpaStorage = mpaStorage;
         this.filmGenreStorage = filmGenreStorage;
+        this.likeStorage = likeStorage;
     }
 
     public FilmDto getFilm(int filmId) {
@@ -99,9 +101,7 @@ public class FilmService {
         Optional<User> optionalUser = userStorage.getUser(userId);
 
         if (optionalFilm.isPresent() && optionalUser.isPresent()) {
-            Film film = optionalFilm.get();
-            Set<Integer> likes = film.getLikes();
-            likes.add(userId);
+            likeStorage.addLike(id, userId);
         }
     }
 
@@ -110,15 +110,13 @@ public class FilmService {
         Optional<User> optionalUser = userStorage.getUser(userId);
 
         if (optionalFilm.isPresent() && optionalUser.isPresent()) {
-            Film film = optionalFilm.get();
-            Set<Integer> likes = film.getLikes();
-            likes.remove(userId);
+            likeStorage.removeLike(id, userId);
         }
     }
 
     public Collection<Film> getMostLikedFilms(int count) {
         Collection<Film> films = filmStorage.getFilms();
-        Comparator<Film> comparator = (f1, f2) -> f2.getLikes().size() - f1.getLikes().size();
+        Comparator<Film> comparator = (f1, f2) -> f2.getLikes() - f1.getLikes();
 
         Collection<Film> f = films.stream().sorted(comparator).limit(count).collect(Collectors.toList());
         System.out.println(f);

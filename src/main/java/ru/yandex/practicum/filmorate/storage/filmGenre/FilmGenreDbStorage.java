@@ -13,7 +13,7 @@ public class FilmGenreDbStorage extends BaseStorage<FilmGenre> implements FilmGe
             "VALUES (?, ?)";
 
     public FilmGenreDbStorage(JdbcTemplate jdbc, RowMapper<FilmGenre> mapper) {
-        super(jdbc, mapper, FilmGenre.class);
+        super(jdbc, mapper);
     }
     public void addFilmGenre(int filmId, int genreId) {
         update(

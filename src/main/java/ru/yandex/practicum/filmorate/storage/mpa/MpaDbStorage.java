@@ -8,7 +8,6 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.BaseStorage;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -18,7 +17,7 @@ public class MpaDbStorage extends BaseStorage<Mpa> implements MpaStorage {
     private static final String GET_ALL_RATINGS_QUERY = "SELECT * FROM mpas";
 
     public MpaDbStorage(JdbcTemplate jdbc, RowMapper<Mpa> mapper) {
-        super(jdbc, mapper, Mpa.class);
+        super(jdbc, mapper);
     }
 
     public Optional<Mpa> getRating(int id) {

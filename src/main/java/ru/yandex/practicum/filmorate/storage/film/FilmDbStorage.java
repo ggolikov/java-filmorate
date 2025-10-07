@@ -18,49 +18,58 @@ import java.util.Optional;
 public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
     public static final LocalDate MIN_FILM_DATE = LocalDate.of(1895, 12, 28);
 
-    private static final String GET_FILM_QUERY = "" +
-            "SELECT\n" +
-            "        f.*, m.name as mpa_name,\n" +
-            "        array_agg(fg.genre_id) as genre_ids,\n" +
-            "        array_agg(fg.GENRE_NAME) as genre_names\n" +
-            "    FROM films AS f\n" +
-            "    LEFT JOIN (SELECT\n" +
-            "                   _fg.GENRE_ID as genre_id,\n" +
-            "                   _fg.FILM_ID as film_id,\n" +
-            "                   _g.name AS genre_name\n" +
-            "                    FROM FILMS_GENRES AS _fg\n" +
-            "\n" +
-            "                    LEFT JOIN GENRES as _g ON _fg.GENRE_ID = _g.ID\n" +
-            "                   ) AS fg\n" +
-            "        ON f.id = fg.film_id\n" +
-            "        LEFT JOIN mpas as m\n" +
-            "            on f.MPA_ID = m.ID\n" +
-            "    WHERE f.id = ?;";
-    private static final String GET_ALL_FILMS_QUERY = "" +
-            "SELECT\n" +
-            "        f.*, m.name as mpa_name,\n" +
-            "        array_agg(fg.genre_id) as genre_ids,\n" +
-            "        array_agg(fg.GENRE_NAME) as genre_names\n" +
-            "    FROM films AS f\n" +
-            "    LEFT JOIN (SELECT\n" +
-            "                   _fg.GENRE_ID as genre_id,\n" +
-            "                   _fg.FILM_ID as film_id,\n" +
-            "                   _g.name AS genre_name\n" +
-            "                    FROM FILMS_GENRES AS _fg\n" +
-            "\n" +
-            "                    LEFT JOIN GENRES as _g ON _fg.GENRE_ID = _g.ID\n" +
-            "                   ) AS fg\n" +
-            "        ON f.id = fg.film_id\n" +
-            "        LEFT JOIN mpas as m\n" +
-            "            on f.MPA_ID = m.ID\n" +
-            "        GROUP BY f.id";
+    private static final String GET_FILM_QUERY = 
+            """
+            SELECT
+                    f.*, m.name as mpa_name,
+                    array_agg(fg.genre_id) as genre_ids,
+                    array_agg(fg.GENRE_NAME) as genre_names,
+                    count(l.user_id) as likes_count
+                FROM films AS f
+                LEFT JOIN likes AS l ON f.id = l.film_id
+                LEFT JOIN (SELECT
+                               _fg.GENRE_ID as genre_id,
+                               _fg.FILM_ID as film_id,
+                               _g.name AS genre_name
+                                FROM FILMS_GENRES AS _fg
+            
+                                LEFT JOIN GENRES as _g ON _fg.GENRE_ID = _g.ID
+                               ) AS fg
+                    ON f.id = fg.film_id
+                    LEFT JOIN mpas as m
+                        on f.MPA_ID = m.ID
+                WHERE f.id = ?
+                GROUP BY f.id;
+            """;
+    private static final String GET_ALL_FILMS_QUERY =
+            """
+            SELECT
+                    f.*, m.name as mpa_name,
+                    array_agg(fg.genre_id) as genre_ids,
+                    array_agg(fg.GENRE_NAME) as genre_names,
+                    count(l.user_id) as likes_count
+                FROM films AS f
+                LEFT JOIN likes AS l ON f.id = l.film_id
+                LEFT JOIN (SELECT
+                               _fg.GENRE_ID as genre_id,
+                               _fg.FILM_ID as film_id,
+                               _g.name AS genre_name
+                                FROM FILMS_GENRES AS _fg
+            
+                                LEFT JOIN GENRES as _g ON _fg.GENRE_ID = _g.ID
+                               ) AS fg
+                    ON f.id = fg.film_id
+                    LEFT JOIN mpas as m
+                        on f.MPA_ID = m.ID
+                    GROUP BY f.id;
+            """;
     private static final String INSERT_FILM_QUERY = "INSERT INTO films(name, description, release_date, duration, mpa_id)" +
             "VALUES (?, ?, ?, ?, ?)";
     private static final String UPDATE_FILM_QUERY = "UPDATE films SET name = ?, description = ?, release_date = ?, duration = ? WHERE id = ?";
     private static final String DELETE_FILM_QUERY = "DELETE FROM films WHERE id = ?";
 
     public FilmDbStorage(JdbcTemplate jdbc, RowMapper<Film> mapper) {
-        super(jdbc, mapper, Film.class);
+        super(jdbc, mapper);
     }
     public Optional<Film> getFilm(int id) {
         return findOne(GET_FILM_QUERY, id);

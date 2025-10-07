@@ -5,8 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
 
 @Data
 public class User {
@@ -20,5 +19,5 @@ public class User {
     private String email;
     private String name;
     private LocalDate birthday;
-    private Set<Friendship> friends = new HashSet<>();
+    private ArrayList<User> friends = new ArrayList<>();
 }
