@@ -2,32 +2,36 @@ package ru.yandex.practicum.filmorate.storage.film;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.exception.InternalServerException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.mappers.FilmResultExtractor;
+import ru.yandex.practicum.filmorate.storage.BaseStorage;
 
-import java.sql.PreparedStatement;
-import java.sql.Statement;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @Qualifier("filmDbStorage")
-@RequiredArgsConstructor
-public class FilmDbStorage extends BaseFilmStorage implements FilmStorage {
+public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
+    public static final LocalDate MIN_FILM_DATE = LocalDate.of(1895, 12, 28);
+
     private static final String GET_FILM_QUERY = "SELECT * FROM films WHERE id = ?";
     private static final String GET_ALL_FILMS_QUERY = "SELECT * FROM films";
     private static final String INSERT_FILM_QUERY = "INSERT INTO films(name, description, release_date, duration)" +
             "VALUES (?, ?, ?, ?)";
-    private static final String UPDATE_FILM_QUERY = "UPDATE films SET name = ?, description = ?, releaseDate = ?, duration = ? WHERE id = ?";
-    private static final String DELETE_FILM_QUERY = "DELETE * FROM films WHERE id = ?";
-    private final JdbcTemplate jdbc;
+    private static final String UPDATE_FILM_QUERY = "UPDATE films SET name = ?, description = ?, release_date = ?, duration = ? WHERE id = ?";
+    private static final String DELETE_FILM_QUERY = "DELETE FROM films WHERE id = ?";
 
-    public Film getFilm(int id) {
-        return jdbc.queryForObject(GET_FILM_QUERY, Film.class, id);
+    public FilmDbStorage(JdbcTemplate jdbc, RowMapper<Film> mapper, ResultSetExtractor<List<Film>> extractor) {
+        super(jdbc, mapper, extractor, Film.class);
+    }
+    public Optional<Film> getFilm(int id) {
+        return findOne(GET_FILM_QUERY, id);
     }
 
     public Film addFilm(Film film) {
@@ -53,43 +57,38 @@ public class FilmDbStorage extends BaseFilmStorage implements FilmStorage {
 
         validate(film);
 
-        int rowsUpdated = jdbc.update(UPDATE_FILM_QUERY,
+        update(UPDATE_FILM_QUERY,
                 film.getName(),
                 film.getDescription(),
                 film.getReleaseDate(),
                 film.getDuration(),
                 film.getId());
-        if (rowsUpdated == 0) {
-            throw new InternalServerException("Не удалось обновить данные");
-        }
 
         return film;
     }
 
     public void removeFilm(int id) {
-        jdbc.update(DELETE_FILM_QUERY, id);
+        update(DELETE_FILM_QUERY, id);
     }
 
     public Collection<Film> getFilms() {
-        return jdbc.query(GET_ALL_FILMS_QUERY, new FilmResultExtractor());
+        return findMany(GET_ALL_FILMS_QUERY);
     }
 
-    private int insert(String query, Object... params) {
-        GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbc.update(connection -> {
-            PreparedStatement ps = connection
-                    .prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
-            for (int idx = 0; idx < params.length; idx++) {
-                ps.setObject(idx + 1, params[idx]);
-            }
-            return ps;}, keyHolder);
+    public void validate(Film film) throws ValidationException {
+        if (film.getName() == null || film.getName().isBlank()) {
+            throw new ValidationException("Поле name не может быть пустым или null");
+        }
+        if (film.getDescription().length() > 200) {
+            throw new ValidationException("Длина поля description не должна превышать 200 символов");
+        }
 
-        try {
-            int id = keyHolder.getKeyAs(Integer.class);
+        if (film.getReleaseDate().isBefore(MIN_FILM_DATE)) {
+            throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года");
+        }
 
-            return id;
-        } catch (NullPointerException e) {
-            throw new InternalServerException("Не удалось сохранить данные");
+        if (film.getDuration() < 0) {
+            throw new ValidationException("Продолжительность фильма должна быть положительным числом");
         }
     }
 }

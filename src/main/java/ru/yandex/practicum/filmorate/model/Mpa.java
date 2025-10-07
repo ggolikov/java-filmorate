@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-public class Rating {
+public class Mpa {
     private int id;
     @NotBlank(message = "Поле name не может быть пустым или null")
     private String name;

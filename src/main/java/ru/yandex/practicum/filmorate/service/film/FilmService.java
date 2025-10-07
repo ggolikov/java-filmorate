@@ -2,6 +2,10 @@ package ru.yandex.practicum.filmorate.service.film;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dto.FilmDto;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.mapper.FilmMapper;
+import ru.yandex.practicum.filmorate.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
@@ -28,8 +32,8 @@ public class FilmService {
         this.userStorage = userStorage;
     }
 
-    public Film getFilm(int filmId) {
-        return filmStorage.getFilm(filmId);
+    public FilmDto getFilm(int filmId) {
+        return filmStorage.getFilm(filmId).map(FilmMapper::mapToFilmDto).orElseThrow(() -> new NotFoundException("Фильм не найден с ID: " + filmId));
     }
 
     public Film addFilm(Film film) {
@@ -49,20 +53,22 @@ public class FilmService {
     }
 
     public void addLike(int id, int userId) {
-        Film film = filmStorage.getFilm(id);
-        Optional<User> user = userStorage.getUser(userId);
+        Optional<Film> optionalFilm = filmStorage.getFilm(id);
+        Optional<User> optionalUser = userStorage.getUser(userId);
 
-        if (film != null && user != null) {
+        if (optionalFilm.isPresent() && optionalUser.isPresent()) {
+            Film film = optionalFilm.get();
             Set<Integer> likes = film.getLikes();
             likes.add(userId);
         }
     }
 
     public void removeLike(int id, int userId) {
-        Film film = filmStorage.getFilm(id);
-        Optional<User> user = userStorage.getUser(userId);
+        Optional<Film> optionalFilm = filmStorage.getFilm(id);
+        Optional<User> optionalUser = userStorage.getUser(userId);
 
-        if (film != null && user != null) {
+        if (optionalFilm.isPresent() && optionalUser.isPresent()) {
+            Film film = optionalFilm.get();
             Set<Integer> likes = film.getLikes();
             likes.remove(userId);
         }

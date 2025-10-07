@@ -5,9 +5,10 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.Collection;
+import java.util.Optional;
 
 public interface FilmStorage {
-    Film getFilm(int id);
+    Optional<Film> getFilm(int id);
 
     Film addFilm(@Valid Film film);
 

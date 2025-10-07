@@ -23,6 +23,7 @@ public class UserController {
 
     @PostMapping
     public User addUser(@RequestBody @Valid User user) {
+
         return userService.addUser(user);
     }
 

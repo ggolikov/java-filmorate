@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.mappers;
 
 import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.sql.ResultSet;
@@ -8,6 +9,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class GenreResultExtractor implements ResultSetExtractor<List<Genre>> {
     @Override
     public List<Genre> extractData(ResultSet rs) throws SQLException {
