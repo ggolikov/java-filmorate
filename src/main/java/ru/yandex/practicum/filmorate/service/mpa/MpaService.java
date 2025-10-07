@@ -15,6 +15,7 @@ import java.util.List;
 @Service
 public class MpaService {
     private final MpaStorage mpaStorage;
+
     @Autowired
     public MpaService(@Qualifier("mpaDbStorage") MpaStorage mpaStorage) {
         this.mpaStorage = mpaStorage;

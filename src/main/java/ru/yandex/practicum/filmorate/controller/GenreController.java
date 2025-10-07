@@ -20,6 +20,7 @@ public class GenreController {
     public GenreDto getGenre(@PathVariable int id) {
         return genreService.getGenre(id);
     }
+
     @GetMapping
     public Collection<Genre> getGenres() {
         return genreService.getGenres();

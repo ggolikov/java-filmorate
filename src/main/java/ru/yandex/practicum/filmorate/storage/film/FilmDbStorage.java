@@ -71,6 +71,7 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
     public FilmDbStorage(JdbcTemplate jdbc, RowMapper<Film> mapper) {
         super(jdbc, mapper);
     }
+
     public Optional<Film> getFilm(int id) {
         return findOne(GET_FILM_QUERY, id);
     }

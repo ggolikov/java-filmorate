@@ -15,6 +15,7 @@ public class FilmGenreDbStorage extends BaseStorage<FilmGenre> implements FilmGe
     public FilmGenreDbStorage(JdbcTemplate jdbc, RowMapper<FilmGenre> mapper) {
         super(jdbc, mapper);
     }
+
     public void addFilmGenre(int filmId, int genreId) {
         update(
                 INSERT_FILM_GENRE_QUERY,

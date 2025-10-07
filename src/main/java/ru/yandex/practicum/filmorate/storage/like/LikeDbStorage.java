@@ -11,6 +11,7 @@ import ru.yandex.practicum.filmorate.storage.BaseStorage;
 @Qualifier("likeDbStorage")
 public class LikeDbStorage extends BaseStorage<Like> implements LikeStorage {
     private static final String ADD_LIKE_QUERY = "INSERT INTO likes(film_id, user_id) VALUES(?, ?)";
+
     private static final String REMOVE_LIKE_QUERY = "DELETE FROM likes WHERE film_id = ? AND user_id = ?";
 
     public LikeDbStorage(JdbcTemplate jdbc, RowMapper<Like> mapper) {
