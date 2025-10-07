@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.storage.mpa;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -15,11 +14,11 @@ import java.util.Optional;
 @Repository
 @Qualifier("mpaDbStorage")
 public class MpaDbStorage extends BaseStorage<Mpa> implements MpaStorage {
-    private static final String GET_RATING_QUERY = "SELECT * FROM ratings WHERE id = ?";
-    private static final String GET_ALL_RATINGS_QUERY = "SELECT * FROM ratings";
+    private static final String GET_RATING_QUERY = "SELECT * FROM mpas WHERE id = ?";
+    private static final String GET_ALL_RATINGS_QUERY = "SELECT * FROM mpas";
 
-    public MpaDbStorage(JdbcTemplate jdbc, RowMapper<Mpa> mapper, ResultSetExtractor<List<Mpa>> extractor) {
-        super(jdbc, mapper, extractor, Mpa.class);
+    public MpaDbStorage(JdbcTemplate jdbc, RowMapper<Mpa> mapper) {
+        super(jdbc, mapper, Mpa.class);
     }
 
     public Optional<Mpa> getRating(int id) {

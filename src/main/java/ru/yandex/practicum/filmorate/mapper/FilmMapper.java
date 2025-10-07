@@ -15,8 +15,8 @@ public final class FilmMapper {
         dto.setDescription(film.getDescription());
         dto.setReleaseDate(film.getReleaseDate());
         dto.setDuration(film.getDuration());
-//        dto.setGenre(film.getGenre());
-//        dto.setRating(film.getRating());
+        dto.setGenres(film.getGenres());
+        dto.setMpa(film.getMpa());
         return dto;
     }
 }

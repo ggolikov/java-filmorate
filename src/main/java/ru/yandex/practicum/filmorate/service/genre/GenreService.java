@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 
 import java.util.Collection;
+import java.util.List;
 
 @Service
 public class GenreService {
@@ -20,6 +21,12 @@ public class GenreService {
     }
 
     public GenreDto getGenre(int genreId) {
+        List<Integer> genres = getGenres().stream().map(Genre::getId).toList();
+
+        if (!genres.contains(genreId)) {
+            throw new NotFoundException("Жанр с ID " + genreId + " не найден");
+        }
+
         return genreStorage.getGenre(genreId).map(GenreMapper::mapToGenreDto).orElseThrow(() -> new NotFoundException("Жанр не найден с ID: " + genreId));
 
     }

@@ -17,7 +17,6 @@ import java.util.Optional;
 public class BaseStorage<T> {
     protected final JdbcTemplate jdbc;
     protected final RowMapper<T> mapper;
-    protected final ResultSetExtractor<List<T>> extractor;
     private final Class<T> entityType;
 
     protected Optional<T> findOne(String query, Object... params) {
@@ -30,7 +29,8 @@ public class BaseStorage<T> {
     }
 
     protected List<T> findMany(String query, Object... params) {
-        return jdbc.query(query, extractor, params);
+        return jdbc.query(query, mapper, params);
+//        return jdbc.queryForList(query, entityType, params);
     }
 
     public boolean delete(String query, Object... params) {

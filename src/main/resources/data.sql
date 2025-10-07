@@ -7,17 +7,17 @@ VALUES
     ('Документальный'),
     ('Боевик');
 
-INSERT INTO ratings(name)
+INSERT INTO mpas(name)
 VALUES
     ('G'),
     ('PG'),
-    ('PG_13'),
+    ('PG-13'),
     ('R'),
-    ('NC_17');
+    ('NC-17');
 --
--- INSERT INTO films (name, description, release_date, duration, genre_id, rating_id)
+-- INSERT INTO films (name, description, release_date, duration, mpa_id)
 --     VALUES
---         ('Джентельмены удачи', '', '1970-01-01', 1500, 1, 1),
+--         ('Джентельмены удачи', '', '1970-01-01', 1500, 1),
 --         ('Кавказская пленница', '', '1970-01-01', 1500, 2, 2),
 --         ('Ирония судьбы', '', '1970-01-01', 1500, 3, 3),
 --         ('Белое солнце пустыни', '', '1970-01-01', 1500, 6, 4);

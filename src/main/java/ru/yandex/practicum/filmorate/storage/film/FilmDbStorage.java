@@ -1,8 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.film;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -20,15 +18,49 @@ import java.util.Optional;
 public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
     public static final LocalDate MIN_FILM_DATE = LocalDate.of(1895, 12, 28);
 
-    private static final String GET_FILM_QUERY = "SELECT * FROM films WHERE id = ?";
-    private static final String GET_ALL_FILMS_QUERY = "SELECT * FROM films";
-    private static final String INSERT_FILM_QUERY = "INSERT INTO films(name, description, release_date, duration)" +
-            "VALUES (?, ?, ?, ?)";
+    private static final String GET_FILM_QUERY = "" +
+            "SELECT\n" +
+            "        f.*, m.name as mpa_name,\n" +
+            "        array_agg(fg.genre_id) as genre_ids,\n" +
+            "        array_agg(fg.GENRE_NAME) as genre_names\n" +
+            "    FROM films AS f\n" +
+            "    LEFT JOIN (SELECT\n" +
+            "                   _fg.GENRE_ID as genre_id,\n" +
+            "                   _fg.FILM_ID as film_id,\n" +
+            "                   _g.name AS genre_name\n" +
+            "                    FROM FILMS_GENRES AS _fg\n" +
+            "\n" +
+            "                    LEFT JOIN GENRES as _g ON _fg.GENRE_ID = _g.ID\n" +
+            "                   ) AS fg\n" +
+            "        ON f.id = fg.film_id\n" +
+            "        LEFT JOIN mpas as m\n" +
+            "            on f.MPA_ID = m.ID\n" +
+            "    WHERE f.id = ?;";
+    private static final String GET_ALL_FILMS_QUERY = "" +
+            "SELECT\n" +
+            "        f.*, m.name as mpa_name,\n" +
+            "        array_agg(fg.genre_id) as genre_ids,\n" +
+            "        array_agg(fg.GENRE_NAME) as genre_names\n" +
+            "    FROM films AS f\n" +
+            "    LEFT JOIN (SELECT\n" +
+            "                   _fg.GENRE_ID as genre_id,\n" +
+            "                   _fg.FILM_ID as film_id,\n" +
+            "                   _g.name AS genre_name\n" +
+            "                    FROM FILMS_GENRES AS _fg\n" +
+            "\n" +
+            "                    LEFT JOIN GENRES as _g ON _fg.GENRE_ID = _g.ID\n" +
+            "                   ) AS fg\n" +
+            "        ON f.id = fg.film_id\n" +
+            "        LEFT JOIN mpas as m\n" +
+            "            on f.MPA_ID = m.ID\n" +
+            "        GROUP BY f.id";
+    private static final String INSERT_FILM_QUERY = "INSERT INTO films(name, description, release_date, duration, mpa_id)" +
+            "VALUES (?, ?, ?, ?, ?)";
     private static final String UPDATE_FILM_QUERY = "UPDATE films SET name = ?, description = ?, release_date = ?, duration = ? WHERE id = ?";
     private static final String DELETE_FILM_QUERY = "DELETE FROM films WHERE id = ?";
 
-    public FilmDbStorage(JdbcTemplate jdbc, RowMapper<Film> mapper, ResultSetExtractor<List<Film>> extractor) {
-        super(jdbc, mapper, extractor, Film.class);
+    public FilmDbStorage(JdbcTemplate jdbc, RowMapper<Film> mapper) {
+        super(jdbc, mapper, Film.class);
     }
     public Optional<Film> getFilm(int id) {
         return findOne(GET_FILM_QUERY, id);
@@ -42,7 +74,8 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
                 film.getName(),
                 film.getDescription(),
                 film.getReleaseDate(),
-                film.getDuration()
+                film.getDuration(),
+                film.getMpa().getId()
         );
         film.setId(id);
         return film;

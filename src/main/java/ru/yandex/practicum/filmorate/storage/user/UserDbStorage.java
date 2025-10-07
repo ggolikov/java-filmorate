@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.storage.user;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -44,8 +43,8 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
 
     private static final String DELETE_USER_FRIEND_QUERY = "DELETE FROM friendship WHERE following_user_id = ? AND followed_user_id = ?";
 
-    public UserDbStorage(JdbcTemplate jdbc, RowMapper<User> mapper, ResultSetExtractor<List<User>> extractor) {
-        super(jdbc, mapper, extractor, User.class);
+    public UserDbStorage(JdbcTemplate jdbc, RowMapper<User> mapper) {
+        super(jdbc, mapper, User.class);
     }
 
     public Optional<User> getUser(int id) {
