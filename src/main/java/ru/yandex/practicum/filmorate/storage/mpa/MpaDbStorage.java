@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.BaseStorage;
+import ru.yandex.practicum.filmorate.storage.mappers.MpaRowMapper;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -17,7 +18,7 @@ public class MpaDbStorage extends BaseStorage<Mpa> implements MpaStorage {
     private static final String GET_ALL_RATINGS_QUERY = "SELECT * FROM mpas";
 
     public MpaDbStorage(JdbcTemplate jdbc, RowMapper<Mpa> mapper) {
-        super(jdbc, mapper);
+        super(jdbc, new MpaRowMapper());
     }
 
     public Optional<Mpa> getRating(int id) {

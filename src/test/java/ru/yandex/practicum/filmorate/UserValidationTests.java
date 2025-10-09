@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class UserValidationTests {
-    UserStorage userStorage  = new UserDbStorage(new JdbcTemplate(), new UserRowMapper());
+    UserStorage userStorage  = new UserDbStorage(new JdbcTemplate());
     User user;
 
     @BeforeEach

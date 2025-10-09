@@ -37,7 +37,7 @@ public class FilmController {
     }
 
     @GetMapping
-    public Collection<Film> getFilms() {
+    public Collection<FilmDto> getFilms() {
         return filmService.getFilms();
     }
 
@@ -52,7 +52,7 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public Collection<Film> getPopularFilms(@RequestParam(value = "count", required = false, defaultValue = defaultLikedFilmsCount) int count) {
+    public Collection<FilmDto> getPopularFilms(@RequestParam(value = "count", required = false, defaultValue = defaultLikedFilmsCount) int count) {
         return filmService.getMostLikedFilms(count);
     }
 }

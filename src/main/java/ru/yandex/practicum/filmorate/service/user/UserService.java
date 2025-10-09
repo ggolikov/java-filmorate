@@ -45,26 +45,25 @@ public class UserService {
         return userStorage.getUsers();
     }
 
+    public Collection<User> getUsers(Set<Integer> ids) {
+        return userStorage.getUsers(ids);
+    }
+
     public void addFriend(int id, int friendId) {
         if (id == friendId) {
             return;
         }
 
-        Optional<User> optionalUser = userStorage.getUser(id);
+        UserDto optionalUser = getUser(id);
 
-        if (optionalUser.isPresent()) {
-            Optional<User> optionalFriend = userStorage.getUser(friendId);
-            if (optionalFriend.isPresent()) {
+        if (optionalUser != null) {
+            UserDto optionalFriend = getUser(friendId);
+            if (optionalFriend != null) {
                 Optional<Friendship> optionalFriendship = friendshipStorage.getFriendship(id, friendId);
                 if (optionalFriendship.isEmpty()) {
                     friendshipStorage.addFriendship(id, friendId, "CONFIRMED");
-//                    friendshipStorage.addFriendship(friendId, id, "CONFIRMED");
                 }
-            } else {
-                throw new NotFoundException("Пользователь не найден");
             }
-        } else {
-            throw new NotFoundException("Пользователь не найден");
         }
     }
 
@@ -76,7 +75,6 @@ public class UserService {
 
             if (optionalFriend.isPresent()) {
                 friendshipStorage.removeFriendship(id, friendId);
-//                friendshipStorage.removeFriendship(friendId, id);
             } else {
                 throw new NotFoundException("Пользователь не найден");
             }
@@ -86,12 +84,9 @@ public class UserService {
     }
 
     public Collection<User> getFriends(int id) {
-        Optional<User> optionalUser = userStorage.getUser(id);
-        if (optionalUser.isPresent()) {
-            return userStorage.getFriends(id);
-        } else {
-            throw new NotFoundException("Пользователь не найден");
-        }
+        userStorage.getUser(id)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
+        return userStorage.getFriends(id);
     }
 
     public Collection<User> getCommonFriends(int id, int otherId) {
@@ -109,17 +104,11 @@ public class UserService {
 
             intersection.retainAll(user2Friends);
 
-            ArrayList<User> commonUsers = new ArrayList<>();
-
-            for (Integer userId : intersection) {
-                Optional<User> optionalFriend = userStorage.getUser(userId);
-                if (optionalFriend.isPresent()) {
-                    User u = optionalFriend.get();
-                    commonUsers.add(u);
-                }
+            if (intersection.isEmpty()) {
+                return new ArrayList<>();
             }
 
-            return commonUsers;
+            return new ArrayList<>(userStorage.getUsers(intersection));
         }
 
         return new ArrayList<>();

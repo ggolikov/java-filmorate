@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class FilmValidationTests {
-    FilmStorage filmStorage = new FilmDbStorage(new JdbcTemplate(), new FilmRowMapper());
+    FilmStorage filmStorage = new FilmDbStorage(new JdbcTemplate());
     Film film;
 
     @BeforeEach

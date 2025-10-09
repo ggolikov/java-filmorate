@@ -2,17 +2,15 @@ package ru.yandex.practicum.filmorate.storage.user;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.BaseStorage;
+import ru.yandex.practicum.filmorate.storage.mappers.UserRowMapper;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Repository
 @Qualifier("userDbStorage")
@@ -36,34 +34,27 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
             FROM users AS u
                      LEFT JOIN FRIENDSHIP as f
                                on f.FOLLOWING_USER_ID = u.ID
-            GROUP BY u.id;
         """;
+    private static final String USERS_GROUPING = " GROUP BY u.id;";
+
     private static final String INSERT_USER_QUERY = "INSERT INTO users(login, email, name, birthday)" +
             "VALUES (?, ?, ?, ?)";
     private static final String UPDATE_USER_QUERY = "UPDATE users SET login = ?, email = ?, name = ?, birthday = ? WHERE id = ?";
 
-    private static final String DELETE_USER_QUERY = "DELETE FROM users WHERE id = ?";
+    private static final String DELETE_USER_QUERY = "DELETE FROM users WHERE id IN (?)";
 
     private static final String USER_FRIENDS_QUERY =
             """
-                SELECT
-                    u.*,
-                    array_agg(f.followed_user_id) as friends
-                    FROM users AS u
-                    LEFT JOIN FRIENDSHIP as f
-                    on f.FOLLOWING_USER_ID = u.ID
-                WHERE ID IN (
-                    SELECT DISTINCT
-                        FOLLOWED_USER_ID
-                        FROM FRIENDSHIP AS F
-                        LEFT JOIN USERS AS U ON F.FOLLOWING_USER_ID = U.ID
-                     WHERE U.ID = ?
-                )
-                GROUP BY u.id;
+                    SELECT u.*, array_agg(f.followed_user_id) AS friends
+                    FROM users u
+                    JOIN friendship f1 ON u.id = f1.followed_user_id
+                    LEFT JOIN friendship f ON f.following_user_id = u.id
+                    WHERE f1.following_user_id = ?
+                    GROUP BY u.id;
             """;
 
-    public UserDbStorage(JdbcTemplate jdbc, RowMapper<User> mapper) {
-        super(jdbc, mapper);
+    public UserDbStorage(JdbcTemplate jdbc) {
+        super(jdbc, new UserRowMapper());
     }
 
     public Optional<User> getUser(int id) {
@@ -115,7 +106,25 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
     }
 
     public Collection<User> getUsers() {
-        return findMany(GET_ALL_USERS_QUERY);
+        return findMany(GET_ALL_USERS_QUERY + USERS_GROUPING);
+    }
+
+
+    public Collection<User> getUsers(Set<Integer> ids) {
+        int[] idsArray =  ids.stream()
+                .mapToInt(Integer::intValue)
+                .toArray();
+        StringBuilder whereClause = new StringBuilder(" WHERE id in (");
+        for (int i = 0; i < idsArray.length; i++) {
+            whereClause.append(idsArray[i]);
+            if (i < ids.size() - 1) {
+                whereClause.append(", ");
+            }
+        }
+
+        whereClause.append(")");
+
+        return findMany(GET_ALL_USERS_QUERY + whereClause + USERS_GROUPING);
     }
 
     public Collection<User> getFriends(int id) {

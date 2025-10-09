@@ -1,12 +1,12 @@
 package ru.yandex.practicum.filmorate.storage.film;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.BaseStorage;
+import ru.yandex.practicum.filmorate.storage.mappers.FilmRowMapper;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -66,8 +66,8 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
     private static final String UPDATE_FILM_QUERY = "UPDATE films SET name = ?, description = ?, release_date = ?, duration = ? WHERE id = ?";
     private static final String DELETE_FILM_QUERY = "DELETE FROM films WHERE id = ?";
 
-    public FilmDbStorage(JdbcTemplate jdbc, RowMapper<Film> mapper) {
-        super(jdbc, mapper);
+    public FilmDbStorage(JdbcTemplate jdbc) {
+        super(jdbc, new FilmRowMapper());
     }
 
     public Optional<Film> getFilm(int id) {

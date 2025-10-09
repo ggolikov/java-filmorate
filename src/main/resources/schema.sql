@@ -37,17 +37,20 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS friendship (
     following_user_id INTEGER REFERENCES users,
     followed_user_id INTEGER REFERENCES users,
-    status varchar
+    status varchar,
+    PRIMARY KEY (following_user_id, followed_user_id)
 );
 
 CREATE TABLE IF NOT EXISTS likes (
     user_id INTEGER REFERENCES users,
-    film_id INTEGER REFERENCES films
+    film_id INTEGER REFERENCES films,
+    PRIMARY KEY (user_id, film_id)
 );
 
 CREATE TABLE IF NOT EXISTS films_genres (
     film_id INTEGER REFERENCES films,
     genre_id INTEGER REFERENCES genres
+--     PRIMARY KEY (film_id, genre_id)
 );
 
 DELETE FROM films;

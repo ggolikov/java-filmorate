@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.service.film;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -16,6 +15,7 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Service
 public class FilmService {
     private final FilmStorage filmStorage;
@@ -25,28 +25,6 @@ public class FilmService {
     private final FilmGenreStorage filmGenreStorage;
     private final LikeStorage likeStorage;
 
-    @Autowired
-    public FilmService(
-            @Qualifier("filmDbStorage")
-            FilmStorage filmStorage,
-            @Qualifier("userDbStorage")
-            UserStorage userStorage,
-            @Qualifier("genreDbStorage")
-            GenreStorage genreStorage,
-            @Qualifier("mpaDbStorage")
-            MpaStorage mpaStorage,
-            @Qualifier("filmGenreDbStorage")
-            FilmGenreStorage filmGenreStorage,
-            @Qualifier("likeDbStorage")
-            LikeStorage likeStorage
-            ) {
-        this.filmStorage = filmStorage;
-        this.userStorage = userStorage;
-        this.genreStorage = genreStorage;
-        this.mpaStorage = mpaStorage;
-        this.filmGenreStorage = filmGenreStorage;
-        this.likeStorage = likeStorage;
-    }
 
     public FilmDto getFilm(int filmId) {
         return filmStorage.getFilm(filmId).map(FilmMapper::mapToFilmDto).orElseThrow(() -> new NotFoundException("Фильм не найден с ID: " + filmId));
@@ -77,7 +55,7 @@ public class FilmService {
             List<Integer> filmGenreIds = film.getGenres().stream().map(Genre::getId).toList();
 
             for (Integer genreId : filmGenreIds) {
-                 filmGenreStorage.addFilmGenre(film.getId(), genreId);
+                filmGenreStorage.addFilmGenre(film.getId(), genreId);
             }
         }
 
@@ -92,8 +70,8 @@ public class FilmService {
         filmStorage.removeFilm(id);
     }
 
-    public Collection<Film> getFilms() {
-        return filmStorage.getFilms();
+    public Collection<FilmDto> getFilms() {
+        return filmStorage.getFilms().stream().map(FilmMapper::mapToFilmDto).collect(Collectors.toList());
     }
 
     public void addLike(int id, int userId) {
@@ -114,12 +92,11 @@ public class FilmService {
         }
     }
 
-    public Collection<Film> getMostLikedFilms(int count) {
+    public Collection<FilmDto> getMostLikedFilms(int count) {
         Collection<Film> films = filmStorage.getFilms();
         Comparator<Film> comparator = (f1, f2) -> f2.getLikes() - f1.getLikes();
 
-        Collection<Film> f = films.stream().sorted(comparator).limit(count).collect(Collectors.toList());
-        System.out.println(f);
-        return f;
+        Collection<Film> f = films.stream().sorted(comparator).limit(count).toList();
+        return f.stream().map(FilmMapper::mapToFilmDto).collect(Collectors.toList());
     }
 }
