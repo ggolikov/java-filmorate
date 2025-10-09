@@ -8,9 +8,9 @@ import lombok.RequiredArgsConstructor;
 public class Friendship {
     private int followingUserId;
     private int followedUserId;
-    private RelationStatus relationStatus;
+    private String relationStatus;
 
-    public Friendship(int followingUserId, int followedUserId, RelationStatus relationStatus) {
+    public Friendship(int followingUserId, int followedUserId, String relationStatus) {
         this.followingUserId = followingUserId;
         this.followedUserId = followedUserId;
         this.relationStatus = relationStatus;
