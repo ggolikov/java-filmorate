@@ -3,6 +3,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.film.FilmService;
 import java.util.*;
@@ -20,8 +21,8 @@ public class FilmController {
         this.filmService = filmService;
     }
 
-    @GetMapping("/films/{filmId}")
-    public Film getFilm(@PathVariable int filmId) {
+    @GetMapping("/{filmId}")
+    public FilmDto getFilm(@PathVariable int filmId) {
         return filmService.getFilm(filmId);
     }
 
@@ -36,7 +37,7 @@ public class FilmController {
     }
 
     @GetMapping
-    public Collection<Film> getFilms() {
+    public Collection<FilmDto> getFilms() {
         return filmService.getFilms();
     }
 
@@ -51,7 +52,7 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public Collection<Film> getPopularFilms(@RequestParam(value = "count", required = false, defaultValue = defaultLikedFilmsCount) int count) {
+    public Collection<FilmDto> getPopularFilms(@RequestParam(value = "count", required = false, defaultValue = defaultLikedFilmsCount) int count) {
         return filmService.getMostLikedFilms(count);
     }
 }

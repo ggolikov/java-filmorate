@@ -6,8 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 @Data
 public class Film {
@@ -19,7 +18,7 @@ public class Film {
     private LocalDate releaseDate;
     @Min(value = 0, message = "Продолжительность фильма должна быть положительным числом")
     private int duration;
-    private Set<Integer> likes = new HashSet<>();
-    private Genre genre;
-    private Rating rating;
+    private int likes;
+    private List<Genre> genres;
+    private Mpa mpa;
 }
