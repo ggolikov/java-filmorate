@@ -55,4 +55,10 @@ public class FilmController {
     public Collection<FilmDto> getPopularFilms(@RequestParam(value = "count", required = false, defaultValue = defaultLikedFilmsCount) int count) {
         return filmService.getMostLikedFilms(count);
     }
+
+    @GetMapping("/common")
+    public Collection<FilmDto> getCommonFilms(@RequestParam int userId,
+                                              @RequestParam int friendId) {
+        return filmService.getCommonFilms(userId, friendId);
+    }
 }
