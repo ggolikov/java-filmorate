@@ -5,6 +5,7 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 public interface FilmStorage {
@@ -19,4 +20,6 @@ public interface FilmStorage {
     Collection<Film> getFilms();
 
     void validate(Film film) throws ValidationException;
+
+    List<Film> getCommonFilms(int userId, int friendId);
 }

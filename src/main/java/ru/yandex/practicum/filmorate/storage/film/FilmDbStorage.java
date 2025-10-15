@@ -132,4 +132,36 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
             throw new ValidationException("Продолжительность фильма должна быть положительным числом");
         }
     }
+
+
+    @Override
+    public List<Film> getCommonFilms(int userId, int friendId) {
+        String sql = """
+            SELECT
+                f.*,
+                m.name as mpa_name,
+                array_agg(fg.genre_id) as genre_ids,
+                array_agg(fg.genre_name) as genre_names,
+                COUNT(l.user_id) as likes_count
+            FROM films AS f
+            JOIN likes AS l_user ON f.id = l_user.film_id AND l_user.user_id = ?
+            JOIN likes AS l_friend ON f.id = l_friend.film_id AND l_friend.user_id = ?
+            LEFT JOIN (SELECT
+                           _fg.GENRE_ID as genre_id,
+                           _fg.FILM_ID as film_id,
+                           _g.name AS genre_name
+                        FROM FILMS_GENRES AS _fg
+                        LEFT JOIN GENRES as _g ON _fg.GENRE_ID = _g.ID
+                       ) AS fg
+                ON f.id = fg.film_id
+            LEFT JOIN mpas as m
+                on f.MPA_ID = m.ID
+            LEFT JOIN likes AS l ON f.id = l.film_id
+            GROUP BY f.id
+            ORDER BY likes_count DESC;
+            """;
+
+        return findMany(sql, userId, friendId);
+    }
+
 }
