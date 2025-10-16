@@ -47,15 +47,15 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
 
     private static final String GET_FILM_LIKES_COUNT = "SELECT COUNT(*) FROM likes WHERE film_id = ?";
     private static final String GET_FILM_GENRES = """
-            SELECT g.id, g.name 
-            FROM genres g 
-            JOIN films_genres fg ON g.id = fg.genre_id 
+            SELECT g.id, g.name
+            FROM genres g
+            JOIN films_genres fg ON g.id = fg.genre_id
             WHERE fg.film_id = ?
             """;
     private static final String GET_FILM_DIRECTORS = """
-            SELECT d.id, d.name 
-            FROM directors d 
-            JOIN films_directors fd ON d.id = fd.director_id 
+            SELECT d.id, d.name
+            FROM directors d
+            JOIN films_directors fd ON d.id = fd.director_id
             WHERE fd.film_id = ?
             """;
 
