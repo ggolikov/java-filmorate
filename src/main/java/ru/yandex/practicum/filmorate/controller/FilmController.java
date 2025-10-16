@@ -1,4 +1,5 @@
 package ru.yandex.practicum.filmorate.controller;
+
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -6,7 +7,9 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.film.FilmService;
-import java.util.*;
+
+import java.util.Collection;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -60,5 +63,11 @@ public class FilmController {
     public Collection<FilmDto> getCommonFilms(@RequestParam int userId,
                                               @RequestParam int friendId) {
         return filmService.getCommonFilms(userId, friendId);
+    }
+
+    @GetMapping("/director/{directorId}")
+    public List<Film> getFilmsByDirector(@PathVariable int directorId,
+                                         @RequestParam String sortBy) {
+        return filmService.getFilmsByDirector(directorId, sortBy);
     }
 }

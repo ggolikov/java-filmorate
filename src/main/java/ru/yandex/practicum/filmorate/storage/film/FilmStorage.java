@@ -22,4 +22,6 @@ public interface FilmStorage {
     void validate(Film film) throws ValidationException;
 
     List<Film> getCommonFilms(int userId, int friendId);
+
+    List<Film> getFilmsByDirector(int directorId, String sortBy);
 }

@@ -20,7 +20,7 @@ public class LikeDbStorage extends BaseStorage<Like> implements LikeStorage {
 
     public void addLike(int filmId, int userId) {
         update(
-            ADD_LIKE_QUERY,
+                ADD_LIKE_QUERY,
                 filmId,
                 userId
         );
