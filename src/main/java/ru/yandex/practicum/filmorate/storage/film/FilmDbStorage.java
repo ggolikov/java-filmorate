@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.storage.BaseStorage;
 import ru.yandex.practicum.filmorate.storage.mappers.FilmRowMapper;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -133,7 +134,6 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
         }
     }
 
-
     @Override
     public List<Film> getCommonFilms(int userId, int friendId) {
         String sql = """
@@ -164,4 +164,52 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
         return findMany(sql, userId, friendId);
     }
 
+    public Collection<Film> getMostLikedFilms(int count, Integer genreId, Integer year) {
+        List<Object> param = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("""
+                SELECT
+                    f.*, m.name as mpa_name,
+                    array_agg(fg.genre_id) as genre_ids,
+                    array_agg(fg.GENRE_NAME) as genre_names,
+                    count(l.user_id) as likes_count
+                FROM films AS f
+                LEFT JOIN likes AS l ON f.id = l.film_id
+                """);
+        if (genreId != null) {
+            sql.append("""
+                    RIGHT JOIN (SELECT
+                                 _fg.GENRE_ID as genre_id,
+                                 _fg.FILM_ID as film_id,
+                                 _g.name AS genre_name
+                                 FROM FILMS_GENRES AS _fg
+                                 LEFT JOIN GENRES as _g ON _fg.GENRE_ID = _g.ID
+                                 WHERE genre_id = ?
+                                 ) AS fg
+                            ON f.id = fg.film_id
+                        LEFT JOIN mpas as m
+                        on f.MPA_ID = m.ID
+                    """);
+            param.add(genreId);
+        } else {
+            sql.append("""
+                    LEFT JOIN (SELECT
+                                 _fg.GENRE_ID as genre_id,
+                                 _fg.FILM_ID as film_id,
+                                 _g.name AS genre_name
+                                 FROM FILMS_GENRES AS _fg
+                                 LEFT JOIN GENRES as _g ON _fg.GENRE_ID = _g.ID
+                                 ) AS fg
+                             ON f.id = fg.film_id
+                         LEFT JOIN mpas as m
+                         on f.MPA_ID = m.ID
+                    """);
+        }
+        if (year != null) {
+            sql.append("WHERE EXTRACT(YEAR FROM f.release_date) = ?");
+            param.add(year);
+        }
+        sql.append("GROUP BY f.id ORDER BY likes_count DESC, f.id DESC LIMIT ?");
+        param.add(count);
+        return findMany(sql.toString(), param.toArray());
+    }
 }

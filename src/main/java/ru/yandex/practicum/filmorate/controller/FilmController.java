@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -52,8 +53,13 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public Collection<FilmDto> getPopularFilms(@RequestParam(value = "count", required = false, defaultValue = defaultLikedFilmsCount) int count) {
-        return filmService.getMostLikedFilms(count);
+    public Collection<FilmDto> getPopularFilms(@RequestParam(value = "count", required = false,
+            defaultValue = defaultLikedFilmsCount) int count,
+                                               @RequestParam(required = false)
+                                               @Positive(message = "Id жанра не может быть отрицательным") Integer genreId,
+                                               @RequestParam(required = false)
+                                                   @Positive(message = "Год не может быть отрицательным") Integer year) {
+        return filmService.getMostLikedFilms(count, genreId, year);
     }
 
     @GetMapping("/common")
