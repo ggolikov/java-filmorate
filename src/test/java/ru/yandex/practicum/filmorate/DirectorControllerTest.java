@@ -88,8 +88,8 @@ class DirectorControllerTest {
 
     @Test
     void testGetDirectorWithInvalidId() throws Exception {
-        when(directorService.getDirector(999))
-                .thenThrow(new ru.yandex.practicum.filmorate.exception.NotFoundException("Режиссёр не найден с ID: 999"));
+        when(directorService.getDirector(99999))
+                .thenThrow(new ru.yandex.practicum.filmorate.exception.NotFoundException("Режиссёр не найден с ID: 99999"));
 
         mockMvc.perform(get("/directors/99999"))
                 .andExpect(status().isNotFound())
