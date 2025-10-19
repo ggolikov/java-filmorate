@@ -1,4 +1,5 @@
 package ru.yandex.practicum.filmorate.controller;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +24,6 @@ public class UserController {
 
     @PostMapping
     public User addUser(@RequestBody @Valid User user) {
-
         return userService.addUser(user);
     }
 
@@ -35,6 +35,11 @@ public class UserController {
     @GetMapping
     public Collection<User> getUsers() {
         return userService.getUsers();
+    }
+
+    @DeleteMapping("/{userId}")
+    public void deleteUser(@PathVariable int userId) {
+        userService.removeUser(userId);
     }
 
     @PutMapping("/{id}/friends/{friendId}")

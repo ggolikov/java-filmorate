@@ -1,12 +1,16 @@
 package ru.yandex.practicum.filmorate.controller;
+
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.film.FilmService;
-import java.util.*;
+
+import java.util.Collection;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -41,6 +45,11 @@ public class FilmController {
         return filmService.getFilms();
     }
 
+    @DeleteMapping("/{filmId}")
+    public void deleteFilm(@PathVariable int filmId) {
+        filmService.removeFilm(filmId);
+    }
+
     @PutMapping("/{id}/like/{userId}")
     public void likeFilm(@PathVariable int id, @PathVariable int userId) {
         filmService.addLike(id, userId);
@@ -52,7 +61,24 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public Collection<FilmDto> getPopularFilms(@RequestParam(value = "count", required = false, defaultValue = defaultLikedFilmsCount) int count) {
-        return filmService.getMostLikedFilms(count);
+    public Collection<FilmDto> getPopularFilms(@RequestParam(value = "count", required = false,
+                                                       defaultValue = defaultLikedFilmsCount) int count,
+                                               @RequestParam(required = false)
+                                               @Positive(message = "Id жанра не может быть отрицательным") Integer genreId,
+                                               @RequestParam(required = false)
+                                               @Positive(message = "Год не может быть отрицательным") Integer year) {
+        return filmService.getMostLikedFilms(count, genreId, year);
+    }
+
+    @GetMapping("/common")
+    public Collection<FilmDto> getCommonFilms(@RequestParam int userId,
+                                              @RequestParam int friendId) {
+        return filmService.getCommonFilms(userId, friendId);
+    }
+
+    @GetMapping("/director/{directorId}")
+    public List<Film> getFilmsByDirector(@PathVariable int directorId,
+                                         @RequestParam String sortBy) {
+        return filmService.getFilmsByDirector(directorId, sortBy);
     }
 }
