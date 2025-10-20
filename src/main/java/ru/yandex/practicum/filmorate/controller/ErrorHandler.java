@@ -10,7 +10,7 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 
 import java.util.Map;
 
-@RestControllerAdvice(assignableTypes = {FilmController.class, UserController.class, MpaController.class, GenreController.class, DirectorController.class})
+@RestControllerAdvice(assignableTypes = {FilmController.class, UserController.class, MpaController.class, GenreController.class, DirectorController.class, ReviewController.class})
 public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
