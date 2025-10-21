@@ -1,29 +1,27 @@
 package ru.yandex.practicum.filmorate.service.user;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dto.EventDto;
 import ru.yandex.practicum.filmorate.dto.UserDto;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.mapper.EventMapper;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
-import ru.yandex.practicum.filmorate.model.Friendship;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.storage.feed.FeedStorage;
 import ru.yandex.practicum.filmorate.storage.friendship.FriendshipStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
     private final UserStorage userStorage;
     private final FriendshipStorage friendshipStorage;
-
-    @Autowired
-    public UserService(@Qualifier("userDbStorage") UserStorage userStorage, @Qualifier("friendshipDbStorage") FriendshipStorage friendshipStorage) {
-        this.userStorage = userStorage;
-        this.friendshipStorage = friendshipStorage;
-    }
+    private final FeedStorage feedStorage;
 
     public UserDto getUser(int userId) {
         return userStorage.getUser(userId).map(UserMapper::mapToUserDto).orElseThrow(() -> new NotFoundException("Пользователь не найден с ID: " + userId));
@@ -62,6 +60,15 @@ public class UserService {
                 Optional<Friendship> optionalFriendship = friendshipStorage.getFriendship(id, friendId);
                 if (optionalFriendship.isEmpty()) {
                     friendshipStorage.addFriendship(id, friendId, "CONFIRMED");
+
+                    Event event = new Event();
+                    event.setUserId(id);
+                    event.setEntityId(friendId);
+                    event.setType(EventType.FRIEND);
+                    event.setOperation(Operation.ADD);
+                    event.setTimestamp(Instant.now().toEpochMilli());
+
+                    feedStorage.addEvent(event);
                 }
             }
         }
@@ -75,6 +82,15 @@ public class UserService {
 
             if (optionalFriend.isPresent()) {
                 friendshipStorage.removeFriendship(id, friendId);
+
+                Event event = new Event();
+                event.setUserId(id);
+                event.setEntityId(friendId);
+                event.setType(EventType.FRIEND);
+                event.setOperation(Operation.REMOVE);
+                event.setTimestamp(Instant.now().toEpochMilli());
+
+                feedStorage.addEvent(event);
             } else {
                 throw new NotFoundException("Пользователь не найден");
             }
@@ -112,5 +128,9 @@ public class UserService {
         }
 
         return new ArrayList<>();
+    }
+
+    public Collection<EventDto> getFeed(int id) {
+        return feedStorage.getUserEvents(id).stream().map(EventMapper::mapToEventDto).toList();
     }
 }
