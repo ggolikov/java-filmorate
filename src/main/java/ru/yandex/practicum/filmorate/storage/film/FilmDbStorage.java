@@ -124,7 +124,6 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
         }
     }
 
-
     @Override
     public Collection<Film> getFilms() {
         Collection<Film> films = findMany(GET_ALL_FILMS_BASIC_QUERY);
@@ -245,31 +244,31 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
         if (genreId != null) {
             sql.append("""
                     RIGHT JOIN (SELECT
-                                 _fg.GENRE_ID as genre_id,
-                                 _fg.FILM_ID as film_id,
-                                 _g.name AS genre_name
-                                 FROM FILMS_GENRES AS _fg
-                                 LEFT JOIN GENRES as _g ON _fg.GENRE_ID = _g.ID
-                                 WHERE genre_id = ?
-                                 ) AS fg
-                            ON f.id = fg.film_id
-                        LEFT JOIN mpas as m
-                        on f.MPA_ID = m.ID
-                    """);
+                                    _fg.GENRE_ID as genre_id,
+                                    _fg.FILM_ID as film_id,
+                                    _g.name AS genre_name
+                                    FROM FILMS_GENRES AS _fg
+                                    LEFT JOIN GENRES as _g ON _fg.GENRE_ID = _g.ID
+                                    WHERE genre_id = ?
+                                    ) AS fg
+                                ON f.id = fg.film_id
+                            LEFT JOIN mpas as m
+                            on f.MPA_ID = m.ID
+                        """);
             param.add(genreId);
         } else {
             sql.append("""
                     LEFT JOIN (SELECT
-                                 _fg.GENRE_ID as genre_id,
-                                 _fg.FILM_ID as film_id,
-                                 _g.name AS genre_name
-                                 FROM FILMS_GENRES AS _fg
-                                 LEFT JOIN GENRES as _g ON _fg.GENRE_ID = _g.ID
-                                 ) AS fg
-                             ON f.id = fg.film_id
-                         LEFT JOIN mpas as m
-                         on f.MPA_ID = m.ID
-                    """);
+                                    _fg.GENRE_ID as genre_id,
+                                    _fg.FILM_ID as film_id,
+                                    _g.name AS genre_name
+                                    FROM FILMS_GENRES AS _fg
+                                    LEFT JOIN GENRES as _g ON _fg.GENRE_ID = _g.ID
+                                    ) AS fg
+                                ON f.id = fg.film_id
+                            LEFT JOIN mpas as m
+                            on f.MPA_ID = m.ID
+                        """);
         }
         if (year != null) {
             sql.append("WHERE EXTRACT(YEAR FROM f.release_date) = ?");

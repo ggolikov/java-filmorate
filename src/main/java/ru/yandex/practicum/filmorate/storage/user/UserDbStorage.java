@@ -116,7 +116,6 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
         return findMany(GET_ALL_USERS_QUERY + USERS_GROUPING);
     }
 
-
     public Collection<User> getUsers(Set<Integer> ids) {
         int[] idsArray = ids.stream()
                 .mapToInt(Integer::intValue)

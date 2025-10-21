@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
+import ru.yandex.practicum.filmorate.storage.feed.FeedStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.filmDirector.FilmDirectorStorage;
 import ru.yandex.practicum.filmorate.storage.filmGenre.FilmGenreStorage;
@@ -15,6 +16,7 @@ import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,6 +31,7 @@ public class FilmService {
     private final LikeStorage likeStorage;
     private final FilmDirectorStorage filmDirectorStorage;
     private final DirectorStorage directorStorage;
+    private final FeedStorage feedStorage;
 
 
     public FilmDto getFilm(int filmId) {
@@ -120,8 +123,7 @@ public class FilmService {
                     throw new NotFoundException("Жанр с ID " + genreId + " не найден");
                 }
             }
-
-
+            
             film.setGenres(distinctGenres);
         }
 
@@ -168,6 +170,16 @@ public class FilmService {
 
         if (optionalFilm.isPresent() && optionalUser.isPresent()) {
             likeStorage.addLike(id, userId);
+
+            Film film = optionalFilm.get();
+            Event event = new Event();
+            event.setUserId(userId);
+            event.setEntityId(film.getId());
+            event.setType(EventType.LIKE);
+            event.setOperation(Operation.ADD);
+            event.setTimestamp(Instant.now().toEpochMilli());
+
+            feedStorage.addEvent(event);
         }
     }
 
@@ -177,6 +189,16 @@ public class FilmService {
 
         if (optionalFilm.isPresent() && optionalUser.isPresent()) {
             likeStorage.removeLike(id, userId);
+
+            Film film = optionalFilm.get();
+            Event event = new Event();
+            event.setUserId(userId);
+            event.setEntityId(film.getId());
+            event.setType(EventType.LIKE);
+            event.setOperation(Operation.REMOVE);
+            event.setTimestamp(Instant.now().toEpochMilli());
+
+            feedStorage.addEvent(event);
         }
     }
 
@@ -206,5 +228,4 @@ public class FilmService {
     public List<Film> getFilmsByDirector(int directorId, String sortBy) {
         return filmStorage.getFilmsByDirector(directorId, sortBy);
     }
-
 }
