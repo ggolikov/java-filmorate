@@ -178,12 +178,15 @@ public class FilmService {
         }
     }
 
-    public Collection<FilmDto> getMostLikedFilms(int count) {
-        Collection<Film> films = filmStorage.getFilms();
-        Comparator<Film> comparator = (f1, f2) -> f2.getLikes() - f1.getLikes();
-
-        Collection<Film> f = films.stream().sorted(comparator).limit(count).toList();
-        return f.stream().map(FilmMapper::mapToFilmDto).collect(Collectors.toList());
+    public Collection<FilmDto> getMostLikedFilms(int count, Integer genreId, Integer year) {
+        if (genreId != null) {
+            genreStorage.getGenre(genreId).orElseThrow(() -> new NotFoundException("Жанр с id " + genreId + " не найден"));
+        }
+        Collection<Film> films = filmStorage.getMostLikedFilms(count, genreId, year);
+        if (films.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return films.stream().map(FilmMapper::mapToFilmDto).toList();
     }
 
     public Collection<FilmDto> getCommonFilms(int userId, int friendId) {
