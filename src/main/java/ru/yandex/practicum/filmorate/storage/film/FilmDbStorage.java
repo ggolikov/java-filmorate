@@ -200,51 +200,47 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
     }
 
     public Collection<Film> getMostLikedFilms(int count, Integer genreId, Integer year) {
-        List<Object> param = new ArrayList<>();
+        List<Object> params = new ArrayList<>();
+
         StringBuilder sql = new StringBuilder("""
                 SELECT
-                    f.*, m.name as mpa_name,
-                    array_agg(fg.genre_id) as genre_ids,
-                    array_agg(fg.GENRE_NAME) as genre_names,
-                    count(l.user_id) as likes_count
-                FROM films AS f
-                LEFT JOIN likes AS l ON f.id = l.film_id
+                    f.*,
+                    m.name AS mpa_name,
+                    array_agg(DISTINCT g.id ORDER BY g.id) AS genre_ids,
+                    array_agg(DISTINCT g.name ORDER BY g.id) AS genre_names,
+                    array_agg(DISTINCT d.id ORDER BY d.id) AS director_ids,
+                    array_agg(DISTINCT d.name ORDER BY d.id) AS director_names,
+                    COUNT(DISTINCT l.user_id) AS likes_count
+                FROM films f
+                LEFT JOIN mpas m ON f.mpa_id = m.id
+                LEFT JOIN films_genres fg ON f.id = fg.film_id
+                LEFT JOIN genres g ON fg.genre_id = g.id
+                LEFT JOIN films_directors fd ON f.id = fd.film_id
+                LEFT JOIN directors d ON fd.director_id = d.id
+                LEFT JOIN likes l ON f.id = l.film_id
                 """);
+
+        List<String> conditions = new ArrayList<>();
         if (genreId != null) {
-            sql.append("""
-                    RIGHT JOIN (SELECT
-                                 _fg.GENRE_ID as genre_id,
-                                 _fg.FILM_ID as film_id,
-                                 _g.name AS genre_name
-                                 FROM FILMS_GENRES AS _fg
-                                 LEFT JOIN GENRES as _g ON _fg.GENRE_ID = _g.ID
-                                 WHERE genre_id = ?
-                                 ) AS fg
-                            ON f.id = fg.film_id
-                        LEFT JOIN mpas as m
-                        on f.MPA_ID = m.ID
-                    """);
-            param.add(genreId);
-        } else {
-            sql.append("""
-                    LEFT JOIN (SELECT
-                                 _fg.GENRE_ID as genre_id,
-                                 _fg.FILM_ID as film_id,
-                                 _g.name AS genre_name
-                                 FROM FILMS_GENRES AS _fg
-                                 LEFT JOIN GENRES as _g ON _fg.GENRE_ID = _g.ID
-                                 ) AS fg
-                             ON f.id = fg.film_id
-                         LEFT JOIN mpas as m
-                         on f.MPA_ID = m.ID
-                    """);
+            conditions.add("EXISTS (SELECT 1 FROM films_genres fg2 WHERE fg2.film_id = f.id AND fg2.genre_id = ?)");
+            params.add(genreId);
         }
         if (year != null) {
-            sql.append("WHERE EXTRACT(YEAR FROM f.release_date) = ?");
-            param.add(year);
+            conditions.add("EXTRACT(YEAR FROM f.release_date) = ?");
+            params.add(year);
         }
-        sql.append("GROUP BY f.id ORDER BY likes_count DESC, f.id DESC LIMIT ?");
-        param.add(count);
-        return findMany(sql.toString(), param.toArray());
+
+        if (!conditions.isEmpty()) {
+            sql.append(" WHERE ").append(String.join(" AND ", conditions));
+        }
+
+        sql.append("""
+                GROUP BY f.id, m.name
+                ORDER BY likes_count DESC, f.id DESC
+                LIMIT ?
+                """);
+        params.add(count);
+
+        return findMany(sql.toString(), params.toArray());
     }
 }
