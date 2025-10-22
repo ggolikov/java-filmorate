@@ -243,4 +243,40 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
 
         return findMany(sql.toString(), params.toArray());
     }
+
+    public Collection<Film> searchFilms(String query, String by) {
+        List<Object> param = new ArrayList<>();
+        List<String> conditions = new ArrayList<>();
+        String lowerQuery = "%" + query.toLowerCase() + "%";
+        List<String> searchBy = List.of(by.toLowerCase().split(","));
+        StringBuilder sql = new StringBuilder("""
+               SELECT
+                    f.*,
+                    m.name AS mpa_name,
+                    array_agg(DISTINCT g.id ORDER BY g.id) AS genre_ids,
+                    array_agg(DISTINCT g.name ORDER BY g.id) AS genre_names,
+                    array_agg(DISTINCT d.id ORDER BY d.id) AS director_ids,
+                    array_agg(DISTINCT d.name ORDER BY d.id) AS director_names,
+                    COUNT(DISTINCT l.user_id) AS likes_count
+                FROM films f
+                LEFT JOIN mpas m ON f.mpa_id = m.id
+                LEFT JOIN films_genres fg ON f.id = fg.film_id
+                LEFT JOIN genres g ON fg.genre_id = g.id
+                LEFT JOIN films_directors fd ON f.id = fd.film_id
+                LEFT JOIN directors d ON fd.director_id = d.id
+                LEFT JOIN likes l ON f.id = l.film_id
+               """);
+        if (searchBy.contains("director")) {
+            conditions.add("LOWER(d.name) LIKE ?");
+            param.add(lowerQuery);
+        }
+        if (searchBy.contains("title")) {
+            conditions.add("LOWER(f.name) LIKE ?");
+            param.add(lowerQuery);
+        }
+        sql.append("WHERE ");
+        sql.append(String.join(" OR ", conditions));
+        sql.append(" GROUP BY f.id ORDER BY likes_count DESC, f.id");
+        return findMany(sql.toString(), param.toArray());
+    }
 }
