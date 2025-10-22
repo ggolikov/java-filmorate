@@ -14,6 +14,7 @@ public class UserRowMapper implements RowMapper<User> {
     public User mapRow(ResultSet rs, int rowNum) throws SQLException {
         User user = new User();
         user.setId(rs.getInt("id"));
+        user.setLogin(rs.getString("login"));
         user.setEmail(rs.getString("email"));
         user.setName(rs.getString("name"));
         user.setBirthday(rs.getDate("birthday").toLocalDate());
@@ -22,9 +23,9 @@ public class UserRowMapper implements RowMapper<User> {
             Object[] idsArray = (Object[]) friendsSqlArray.getArray();
 
             ArrayList<User> friends = new ArrayList<>();
-            for (int i = 0; i < idsArray.length; i++) {
-                if (idsArray[i] instanceof Integer) {
-                    int id = (Integer) idsArray[i];
+            for (Object o : idsArray) {
+                if (o instanceof Integer) {
+                    int id = (Integer) o;
                     if (!friends.stream().map(User::getId).toList().contains(id)) {
                         User friend = new User();
 
