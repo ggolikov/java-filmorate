@@ -228,4 +228,14 @@ public class FilmService {
     public List<Film> getFilmsByDirector(int directorId, String sortBy) {
         return filmStorage.getFilmsByDirector(directorId, sortBy);
     }
+
+    public Collection<FilmDto> searchFilms(String query, String by) {
+        if (!Set.of("title", "director", "title,director","director,title").contains(by)) {
+            throw new IllegalArgumentException("Параметр поиска " + by + " не найден");
+        }
+        return filmStorage.searchFilms(query, by)
+                .stream()
+                .map(FilmMapper::mapToFilmDto)
+                .collect(Collectors.toList());
+    }
 }
