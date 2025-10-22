@@ -16,20 +16,24 @@ import java.util.Collection;
 public class UserController {
     private final UserService userService;
 
-    @GetMapping("/users/{userId}")
+    @GetMapping("/{userId}")
     public UserDto getUser(@PathVariable int userId) {
         return userService.getUser(userId);
     }
 
     @PostMapping
     public User addUser(@RequestBody @Valid User user) {
-
         return userService.addUser(user);
     }
 
     @PutMapping
     public User updateUser(@RequestBody @Valid User user) {
         return userService.updateUser(user);
+    }
+
+    @DeleteMapping("/{userId}")
+    public void deleteUser(@PathVariable int userId) {
+        userService.removeUser(userId);
     }
 
     @GetMapping

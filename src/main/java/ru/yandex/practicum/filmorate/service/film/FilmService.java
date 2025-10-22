@@ -67,6 +67,7 @@ public class FilmService {
     }
 
     public void removeFilm(int id) {
+        filmStorage.getFilm(id).orElseThrow(() -> new NotFoundException("Фильм не найден с ID: " + id));
         filmStorage.removeFilm(id);
     }
 

@@ -93,7 +93,7 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
         List<Integer> ids = getFilms().stream().mapToInt(Film::getId).boxed().toList();
 
         if (!ids.contains(film.getId())) {
-            throw new NotFoundException("Фильм с id" + film.getId()  + "не найден");
+            throw new NotFoundException("Фильм с id " + film.getId()  + " не найден");
         }
 
         validate(film);
@@ -109,7 +109,11 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
     }
 
     public void removeFilm(int id) {
-        update(DELETE_FILM_QUERY, id);
+        Optional<Film> film = getFilm(id);
+        if (film.isEmpty()) {
+            throw new NotFoundException("Фильм с id " + id + " не найден");
+        }
+        delete(DELETE_FILM_QUERY, id);
     }
 
     public Collection<Film> getFilms() {

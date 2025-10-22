@@ -16,32 +16,32 @@ import java.util.*;
 @Qualifier("userDbStorage")
 public class UserDbStorage extends BaseStorage<User> implements UserStorage {
     private static final String GET_USER_QUERY =
-        """
-            SELECT
-                u.*,
-                array_agg(f.followed_user_id) as friends
-            FROM users AS u
-                LEFT JOIN FRIENDSHIP as f
-                on f.FOLLOWING_USER_ID = u.ID
-            WHERE u.id = ?
-            GROUP BY u.id;
-        """;
+            """
+                SELECT
+                    u.*,
+                    array_agg(f.followed_user_id) as friends
+                FROM users AS u
+                    LEFT JOIN FRIENDSHIP as f
+                    on f.FOLLOWING_USER_ID = u.ID
+                WHERE u.id = ?
+                GROUP BY u.id;
+            """;
     private static final String GET_ALL_USERS_QUERY =
-        """
-            SELECT
-                u.*,
-                array_agg(f.followed_user_id) as friends
-            FROM users AS u
-                     LEFT JOIN FRIENDSHIP as f
-                               on f.FOLLOWING_USER_ID = u.ID
-        """;
+            """
+                SELECT
+                    u.*,
+                    array_agg(f.followed_user_id) as friends
+                FROM users AS u
+                         LEFT JOIN FRIENDSHIP as f
+                                   on f.FOLLOWING_USER_ID = u.ID
+            """;
     private static final String USERS_GROUPING = " GROUP BY u.id;";
 
     private static final String INSERT_USER_QUERY = "INSERT INTO users(login, email, name, birthday)" +
             "VALUES (?, ?, ?, ?)";
     private static final String UPDATE_USER_QUERY = "UPDATE users SET login = ?, email = ?, name = ?, birthday = ? WHERE id = ?";
 
-    private static final String DELETE_USER_QUERY = "DELETE FROM users WHERE id IN (?)";
+    private static final String DELETE_USER_QUERY = "DELETE FROM users WHERE id = ?";
 
     private static final String USER_FRIENDS_QUERY =
             """
@@ -80,16 +80,16 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
     }
 
     public User updateUser(User user) {
-       List<Integer> ids = getUsers().stream().mapToInt(User::getId).boxed().toList();
+        List<Integer> ids = getUsers().stream().mapToInt(User::getId).boxed().toList();
 
-       if (!ids.contains(user.getId())) {
-           throw new NotFoundException("Пользователь с id" + user.getId()  + "не найден");
-       }
+        if (!ids.contains(user.getId())) {
+            throw new NotFoundException("Пользователь с id " + user.getId()  + " не найден");
+        }
 
         validate(user);
 
-        if (user.getName().isEmpty()) {
-            user.setLogin(user.getLogin());
+        if (user.getName() == null || user.getName().isEmpty()) {
+            user.setName(user.getLogin());
         }
 
         update(UPDATE_USER_QUERY,
@@ -102,6 +102,10 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
     }
 
     public void removeUser(int id) {
+        Optional<User> user = getUser(id);
+        if (user.isEmpty()) {
+            throw new NotFoundException("Пользователь с id " + id + " не найден");
+        }
         delete(DELETE_USER_QUERY, id);
     }
 

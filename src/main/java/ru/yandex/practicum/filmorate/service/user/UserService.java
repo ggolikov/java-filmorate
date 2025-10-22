@@ -38,6 +38,7 @@ public class UserService {
     }
 
     public void removeUser(int id) {
+        userStorage.getUser(id).orElseThrow(() -> new NotFoundException("Пользователь не найден с ID: " + id));
         userStorage.removeUser(id);
     }
 
