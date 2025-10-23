@@ -1,5 +1,4 @@
 package ru.yandex.practicum.filmorate.controller;
-
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,9 +33,9 @@ public class UserController {
         return userService.updateUser(user);
     }
 
-    @DeleteMapping("/{userId}")
-    public void deleteUser(@PathVariable int userId) {
-        userService.removeUser(userId);
+    @DeleteMapping("/{id}")
+    public void deleteUser(@PathVariable int id) {
+        userService.removeUser(id);
     }
 
     @GetMapping
