@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.BaseStorage;
 import ru.yandex.practicum.filmorate.storage.mappers.ReviewRowMapper;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -22,7 +23,7 @@ public class ReviewDbStorage extends BaseStorage<Review> implements ReviewStorag
 
     private static final String INSERT_REVIEW_QUERY = "INSERT INTO reviews(user_id, film_id, content, is_positive, useful)" +
             "VALUES (?, ?, ?, ?, ?)";
-    private static final String UPDATE_REVIEW_QUERY = "UPDATE reviews SET user_id = ?, film_id = ?, content = ?, is_positive = ?, useful = ? WHERE id = ?";
+    private static final String UPDATE_REVIEW_QUERY = "UPDATE reviews SET content = ?, is_positive = ?, useful = ? WHERE id = ?";
     private static final String DELETE_REVIEW_QUERY = "DELETE FROM reviews WHERE id IN (?)";
 
     public ReviewDbStorage(JdbcTemplate jdbc) {
@@ -49,25 +50,20 @@ public class ReviewDbStorage extends BaseStorage<Review> implements ReviewStorag
     }
 
     public Review updateReview(Review review) {
-        List<Integer> ids = getReviews().stream().mapToInt(Review::getId).boxed().toList();
-
-        if (!ids.contains(review.getId())) {
+        if (getReview(review.getId()).isEmpty()) {
             throw new NotFoundException("Отзыв с id " + review.getId() + " не найден");
         }
 
         validate(review);
 
-        int id = insert(
+        update(
                 UPDATE_REVIEW_QUERY,
-                review.getUserId(),
-                review.getFilmId(),
                 review.getContent(),
                 review.getIsPositive(),
                 review.getUseful(),
                 review.getId()
-                );
-        review.setId(id);
-        return review;
+        );
+        return getReview(review.getId()).get();
     }
 
     public void removeReview(int id) {
@@ -80,16 +76,19 @@ public class ReviewDbStorage extends BaseStorage<Review> implements ReviewStorag
 
     public Collection<Review> getReviews(int filmId, int count) {
         StringBuilder sql = new StringBuilder(GET_ALL_REVIEWS_QUERY);
+        List<Object> params = new ArrayList<>();
 
         if (filmId != -1) {
             sql.append(" WHERE film_id = ?");
+            params.add(filmId);
         }
 
         sql.append(GET_ALL_REVIEWS_QUERY_ORDER_CLAUSE);
 
         sql.append(" LIMIT ?");
+        params.add(count);
 
-        return findMany(sql.toString(), filmId, count);
+        return findMany(sql.toString(), params.toArray());
     }
 
     public void validate(Review review) throws ValidationException {
