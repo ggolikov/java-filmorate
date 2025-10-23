@@ -91,8 +91,8 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
 
         validate(user);
 
-        if (user.getName().isEmpty()) {
-            user.setLogin(user.getLogin());
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
         }
 
         update(UPDATE_USER_QUERY,

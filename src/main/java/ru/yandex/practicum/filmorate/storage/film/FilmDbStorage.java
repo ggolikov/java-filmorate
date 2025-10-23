@@ -1,5 +1,4 @@
 package ru.yandex.practicum.filmorate.storage.film;
-
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -118,7 +117,7 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
 
     @Override
     public void removeFilm(int id) {
-        update(DELETE_FILM_QUERY, id);
+        delete(DELETE_FILM_QUERY, id);
     }
 
     @Override
@@ -222,7 +221,7 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
 
         List<String> conditions = new ArrayList<>();
         if (genreId != null) {
-            conditions.add("EXISTS (SELECT 1 FROM films_genres fg2 WHERE fg2.film_id = f.id AND fg2.genre_id = ?)");
+            conditions.add("f.id IN (SELECT fg2.film_id FROM films_genres fg2 WHERE fg2.genre_id = ?)");
             params.add(genreId);
         }
         if (year != null) {
@@ -276,7 +275,7 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
         }
         sql.append("WHERE ");
         sql.append(String.join(" OR ", conditions));
-        sql.append(" GROUP BY f.id ORDER BY likes_count DESC, f.id");
+        sql.append(" GROUP BY f.id, m.name ORDER BY likes_count DESC, f.id");
         return findMany(sql.toString(), param.toArray());
     }
 }

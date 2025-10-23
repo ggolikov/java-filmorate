@@ -3,13 +3,17 @@ package ru.yandex.practicum.filmorate.service.user;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dto.EventDto;
+import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.dto.UserDto;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.EventMapper;
+import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.feed.FeedStorage;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.friendship.FriendshipStorage;
+import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.Instant;
@@ -22,6 +26,8 @@ public class UserService {
     private final UserStorage userStorage;
     private final FriendshipStorage friendshipStorage;
     private final FeedStorage feedStorage;
+    private final LikeStorage likeStorage;
+    private final FilmStorage filmStorage;
 
     public UserDto getUser(int userId) {
         return userStorage.getUser(userId).map(UserMapper::mapToUserDto).orElseThrow(() -> new NotFoundException("Пользователь не найден с ID: " + userId));
@@ -132,5 +138,24 @@ public class UserService {
 
     public Collection<EventDto> getFeed(int id) {
         return feedStorage.getUserEvents(id).stream().map(EventMapper::mapToEventDto).toList();
+    }
+
+    public Collection<FilmDto> getRecommendations(int userId) {
+        userStorage.getUser(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден с ID: " + userId));
+
+        Optional<Integer> similarUserIdOpt = likeStorage.findMostSimilarUser(userId);
+
+        if (similarUserIdOpt.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        int similarUserId = similarUserIdOpt.get();
+
+        Collection<Film> recommendedFilms = likeStorage.getRecommendedFilms(userId, similarUserId);
+
+        return recommendedFilms.stream()
+                .map(FilmMapper::mapToFilmDto)
+                .collect(Collectors.toList());
     }
 }
