@@ -24,7 +24,7 @@ public class ReviewDbStorage extends BaseStorage<Review> implements ReviewStorag
     private static final String INSERT_REVIEW_QUERY = "INSERT INTO reviews(user_id, film_id, content, is_positive, useful)" +
             "VALUES (?, ?, ?, ?, ?)";
     private static final String UPDATE_REVIEW_QUERY = "UPDATE reviews SET content = ?, is_positive = ?, useful = ? WHERE id = ?";
-    private static final String DELETE_REVIEW_QUERY = "DELETE FROM reviews WHERE id IN (?)";
+    private static final String DELETE_REVIEW_QUERY = "DELETE FROM reviews WHERE id = ?";
 
     public ReviewDbStorage(JdbcTemplate jdbc) {
         super(jdbc, new ReviewRowMapper());

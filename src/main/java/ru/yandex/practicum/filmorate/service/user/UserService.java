@@ -137,6 +137,8 @@ public class UserService {
     }
 
     public Collection<EventDto> getFeed(int id) {
+        userStorage.getUser(id)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден с ID: " + id));
         return feedStorage.getUserEvents(id).stream().map(EventMapper::mapToEventDto).toList();
     }
 

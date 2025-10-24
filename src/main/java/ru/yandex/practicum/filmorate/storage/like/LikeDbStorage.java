@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Like;
+import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.BaseStorage;
 import ru.yandex.practicum.filmorate.storage.mappers.FilmRowMapper;
 import ru.yandex.practicum.filmorate.storage.mappers.LikeRowMapper;
@@ -16,6 +17,8 @@ import java.util.Optional;
 @Repository
 @Qualifier("likeDbStorage")
 public class LikeDbStorage extends BaseStorage<Like> implements LikeStorage {
+    private static final String GET_LIKE_QUERY = "SELECT * from likes WHERE film_id = ? AND user_id = ?";
+
     private static final String ADD_LIKE_QUERY = "INSERT INTO likes(film_id, user_id) VALUES(?, ?)";
 
     private static final String REMOVE_LIKE_QUERY = "DELETE FROM likes WHERE film_id = ? AND user_id = ?";
@@ -60,6 +63,10 @@ public class LikeDbStorage extends BaseStorage<Like> implements LikeStorage {
     public LikeDbStorage(JdbcTemplate jdbc, FilmRowMapper filmRowMapper) {
         super(jdbc, new LikeRowMapper());
         this.filmRowMapper = filmRowMapper;
+    }
+
+    public Optional<Like> getLike(int filmId, int usrId) {
+        return findOne(GET_LIKE_QUERY, filmId, usrId);
     }
 
     public void addLike(int filmId, int userId) {

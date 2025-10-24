@@ -44,7 +44,7 @@ public class UserDbStorage extends BaseStorage<User> implements UserStorage {
             "VALUES (?, ?, ?, ?)";
     private static final String UPDATE_USER_QUERY = "UPDATE users SET login = ?, email = ?, name = ?, birthday = ? WHERE id = ?";
 
-    private static final String DELETE_USER_QUERY = "DELETE FROM users WHERE id IN (?)";
+    private static final String DELETE_USER_QUERY = "DELETE FROM users WHERE id = ?";
 
     private static final String USER_FRIENDS_QUERY =
             """

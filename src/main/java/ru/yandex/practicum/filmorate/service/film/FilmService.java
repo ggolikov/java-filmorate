@@ -102,12 +102,22 @@ public class FilmService {
         if (!mpas.contains(film.getMpa().getId())) {
             throw new NotFoundException("Рейтинг с ID " + film.getMpa().getId() + " не найден");
         }
+        Film currentFilm = filmStorage.getFilm(film.getId()).orElseThrow(() -> new NotFoundException("Фильм не найден с ID: " + film.getId()));
 
         List<Genre> filmGenres = film.getGenres();
+        List<Genre> currentFilmGenres = currentFilm.getGenres();
 
-        if (filmGenres != null && !filmGenres.isEmpty()) {
+        if (filmGenres == null || filmGenres.isEmpty()) {
+            if (!currentFilmGenres.isEmpty()) {
+                filmGenreStorage.deleteGenresByFilmId(film.getId());
+            }
+            film.setGenres(new ArrayList<>());
+        } else {
+            if (!currentFilmGenres.isEmpty()) {
+                filmGenreStorage.deleteGenresByFilmId(film.getId());
+            }
+
             List<Integer> genreIds = genreStorage.getGenres().stream().map(Genre::getId).toList();
-
 
             List<Genre> distinctGenres = filmGenres.stream()
                     .collect(Collectors.collectingAndThen(
@@ -128,10 +138,7 @@ public class FilmService {
 
         Film result = filmStorage.updateFilm(film);
 
-
         if (filmGenres != null) {
-
-            filmGenreStorage.deleteGenresByFilmId(film.getId());
             if (!filmGenres.isEmpty()) {
                 List<Integer> filmGenreIds = film.getGenres().stream().map(Genre::getId).toList();
                 for (Integer genreId : filmGenreIds) {
@@ -162,13 +169,14 @@ public class FilmService {
     }
 
     public void addLike(int id, int userId) {
-        Optional<Film> optionalFilm = filmStorage.getFilm(id);
-        Optional<User> optionalUser = userStorage.getUser(userId);
+        Film film = filmStorage.getFilm(id).orElseThrow(() -> new NotFoundException("Фильм не найден с ID: " + id));
+        userStorage.getUser(userId).orElseThrow(() -> new NotFoundException("Пользователь не найден с ID: " + userId));
 
-        if (optionalFilm.isPresent() && optionalUser.isPresent()) {
+        Optional<Like> optionalLike = likeStorage.getLike(id, userId);
+
+        if (optionalLike.isEmpty()) {
             likeStorage.addLike(id, userId);
 
-            Film film = optionalFilm.get();
             Event event = new Event();
             event.setUserId(userId);
             event.setEntityId(film.getId());
@@ -181,22 +189,20 @@ public class FilmService {
     }
 
     public void removeLike(int id, int userId) {
-        Optional<Film> optionalFilm = filmStorage.getFilm(id);
-        Optional<User> optionalUser = userStorage.getUser(userId);
+        Film film = filmStorage.getFilm(id).orElseThrow(() -> new NotFoundException("Фильм не найден с ID: " + id));
 
-        if (optionalFilm.isPresent() && optionalUser.isPresent()) {
-            likeStorage.removeLike(id, userId);
+        userStorage.getUser(userId).orElseThrow(() -> new NotFoundException("Пользователь не найден с ID: " + userId));
 
-            Film film = optionalFilm.get();
-            Event event = new Event();
-            event.setUserId(userId);
-            event.setEntityId(film.getId());
-            event.setType(EventType.LIKE);
-            event.setOperation(Operation.REMOVE);
-            event.setTimestamp(Instant.now().toEpochMilli());
+        likeStorage.removeLike(id, userId);
 
-            feedStorage.addEvent(event);
-        }
+        Event event = new Event();
+        event.setUserId(userId);
+        event.setEntityId(film.getId());
+        event.setType(EventType.LIKE);
+        event.setOperation(Operation.REMOVE);
+        event.setTimestamp(Instant.now().toEpochMilli());
+
+        feedStorage.addEvent(event);
     }
 
     public Collection<FilmDto> getMostLikedFilms(int count, Integer genreId, Integer year) {
@@ -223,6 +229,7 @@ public class FilmService {
     }
 
     public List<Film> getFilmsByDirector(int directorId, String sortBy) {
+        directorStorage.getDirector(directorId).orElseThrow(() -> new NotFoundException("Режиссёр не найден с ID: " + directorId));
         return filmStorage.getFilmsByDirector(directorId, sortBy);
     }
 

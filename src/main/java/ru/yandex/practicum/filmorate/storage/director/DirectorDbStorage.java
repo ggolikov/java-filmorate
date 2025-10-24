@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.storage.BaseStorage;
 import ru.yandex.practicum.filmorate.storage.mappers.DirectorRowMapper;
@@ -33,6 +34,8 @@ public class DirectorDbStorage extends BaseStorage<Director> implements Director
     }
 
     public Director addDirector(Director director) {
+        validate(director);
+
         int id = insert(INSERT_DIRECTOR_QUERY, director.getName());
         director.setId(id);
         return director;
@@ -42,6 +45,7 @@ public class DirectorDbStorage extends BaseStorage<Director> implements Director
         if (getDirector(director.getId()).isEmpty()) {
             throw new NotFoundException("Режиссёр не найден с ID: " + director.getId());
         }
+        validate(director);
 
         update(UPDATE_DIRECTOR_QUERY, director.getName(), director.getId());
         return director;
@@ -49,5 +53,11 @@ public class DirectorDbStorage extends BaseStorage<Director> implements Director
 
     public void removeDirector(int id) {
         delete(DELETE_DIRECTOR_QUERY, id);
+    }
+
+    public void validate(Director director) {
+        if (director.getName() == null || director.getName().isBlank()) {
+            throw new ValidationException("Поле name не может быть пустым или null");
+        }
     }
 }

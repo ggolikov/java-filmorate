@@ -104,7 +104,6 @@ public class ReviewService {
         event.setTimestamp(Instant.now().toEpochMilli());
 
         feedStorage.addEvent(event);
-
         reviewStorage.removeReview(id);
     }
 
@@ -116,7 +115,17 @@ public class ReviewService {
             if (reviewDislike.isPresent()) {
                 removeDislike(id, userId);
             }
+
+            Event event = new Event();
+            event.setUserId(userId);
+            event.setEntityId(id);
+            event.setType(EventType.LIKE);
+            event.setOperation(Operation.ADD);
+            event.setTimestamp(Instant.now().toEpochMilli());
+
+            feedStorage.addEvent(event);
             reviewLikeStorage.addLike(id, userId);
+
             updateReviewUsefulAfterLikesCountChange(id, true);
         }
     }
@@ -125,7 +134,16 @@ public class ReviewService {
         Optional<ReviewLike> reviewLike = reviewLikeStorage.getLike(id, userId);
 
         if (reviewLike.isPresent()) {
+            Event event = new Event();
+            event.setUserId(userId);
+            event.setEntityId(id);
+            event.setType(EventType.LIKE);
+            event.setOperation(Operation.REMOVE);
+            event.setTimestamp(Instant.now().toEpochMilli());
+
+            feedStorage.addEvent(event);
             reviewLikeStorage.removeLike(id, userId);
+
             updateReviewUsefulAfterLikesCountChange(id, false);
         }
     }

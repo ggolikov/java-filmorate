@@ -235,7 +235,7 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
 
         sql.append("""
                 GROUP BY f.id, m.name
-                ORDER BY likes_count DESC, f.id DESC
+                ORDER BY likes_count DESC
                 LIMIT ?
                 """);
         params.add(count);
@@ -275,7 +275,7 @@ public class FilmDbStorage extends BaseStorage<Film> implements FilmStorage {
         }
         sql.append("WHERE ");
         sql.append(String.join(" OR ", conditions));
-        sql.append(" GROUP BY f.id, m.name ORDER BY likes_count DESC, f.id");
+        sql.append(" GROUP BY f.id, m.name ORDER BY likes_count DESC");
         return findMany(sql.toString(), param.toArray());
     }
 }
