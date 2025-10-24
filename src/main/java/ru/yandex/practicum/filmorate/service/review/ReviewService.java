@@ -70,20 +70,22 @@ public class ReviewService {
     }
 
     public ReviewDto updateReview(ReviewDto dto) {
-        Review review = ReviewMapper.mapToReview(dto);
-
-        Integer userId = getReviewUserId(review);
+        Review existingReview = reviewStorage.getReview(dto.getReviewId()).orElseThrow(() -> new NotFoundException("Отзыв не найден с ID: " + dto.getReviewId()));
 
         Event event = new Event();
-        event.setUserId(userId);
-        event.setEntityId(review.getId());
+        event.setUserId(existingReview.getUserId());
+        event.setEntityId(existingReview.getId());
         event.setType(EventType.REVIEW);
         event.setOperation(Operation.UPDATE);
         event.setTimestamp(Instant.now().toEpochMilli());
 
         feedStorage.addEvent(event);
 
-        return ReviewMapper.mapToReviewDto(reviewStorage.updateReview(review));
+        existingReview.setContent(dto.getContent());
+        existingReview.setIsPositive(dto.getIsPositive());
+
+        Review result = reviewStorage.updateReview(existingReview);
+        return ReviewMapper.mapToReviewDto(result);
     }
 
     public void removeReview(int id) {
@@ -109,13 +111,8 @@ public class ReviewService {
 
     public void addLike(int id, int userId) {
         Optional<ReviewLike> reviewLike = reviewLikeStorage.getLike(id, userId);
-        Optional<ReviewLike> reviewDislike = reviewDislikeStorage.getDislike(id, userId);
 
         if (reviewLike.isEmpty()) {
-            if (reviewDislike.isPresent()) {
-                removeDislike(id, userId);
-            }
-
             Event event = new Event();
             event.setUserId(userId);
             event.setEntityId(id);
@@ -123,10 +120,9 @@ public class ReviewService {
             event.setOperation(Operation.ADD);
             event.setTimestamp(Instant.now().toEpochMilli());
 
-            feedStorage.addEvent(event);
             reviewLikeStorage.addLike(id, userId);
 
-            updateReviewUsefulAfterLikesCountChange(id, true);
+            updateReviewUsefulAfterLikesCountChange(id, userId, true);
         }
     }
 
@@ -144,20 +140,16 @@ public class ReviewService {
             feedStorage.addEvent(event);
             reviewLikeStorage.removeLike(id, userId);
 
-            updateReviewUsefulAfterLikesCountChange(id, false);
+            updateReviewUsefulAfterLikesCountChange(id, userId, false);
         }
     }
 
     public void addDislike(int id, int userId) {
         Optional<ReviewLike> reviewDislike = reviewDislikeStorage.getDislike(id, userId);
-        Optional<ReviewLike> reviewLike = reviewLikeStorage.getLike(id, userId);
 
         if (reviewDislike.isEmpty()) {
-            if (reviewLike.isPresent()) {
-                removeLike(id, userId);
-            }
             reviewDislikeStorage.addDislike(id, userId);
-            updateReviewUsefulAfterLikesCountChange(id, false);
+            updateReviewUsefulAfterLikesCountChange(id, userId,false);
         }
     }
 
@@ -166,16 +158,23 @@ public class ReviewService {
 
         if (reviewDislike.isPresent()) {
             reviewDislikeStorage.removeDislike(id, userId);
-            updateReviewUsefulAfterLikesCountChange(id, true);
+            updateReviewUsefulAfterLikesCountChange(id, userId,true);
         }
     }
 
-    private void updateReviewUsefulAfterLikesCountChange(int id, boolean increment) {
+    private void updateReviewUsefulAfterLikesCountChange(int id, int userId, boolean increment) {
         ReviewDto dto = getReview(id);
-
+        dto.setUserId(userId);
         dto.setUseful(increment ? dto.getUseful() + 1 : dto.getUseful() - 1);
 
-        updateReview(dto);
+        reviewStorage.updateReview(ReviewMapper.mapToReview(dto));
+
+        Event event = new Event();
+        event.setUserId(userId);
+        event.setEntityId(dto.getReviewId());
+        event.setType(EventType.REVIEW);
+        event.setOperation(Operation.UPDATE);
+        event.setTimestamp(Instant.now().toEpochMilli());
     }
 
     private int getReviewUserId(Review review) {

@@ -176,16 +176,16 @@ public class FilmService {
 
         if (optionalLike.isEmpty()) {
             likeStorage.addLike(id, userId);
-
-            Event event = new Event();
-            event.setUserId(userId);
-            event.setEntityId(film.getId());
-            event.setType(EventType.LIKE);
-            event.setOperation(Operation.ADD);
-            event.setTimestamp(Instant.now().toEpochMilli());
-
-            feedStorage.addEvent(event);
         }
+
+        Event event = new Event();
+        event.setUserId(userId);
+        event.setEntityId(film.getId());
+        event.setType(EventType.LIKE);
+        event.setOperation(Operation.ADD);
+        event.setTimestamp(Instant.now().toEpochMilli());
+
+        feedStorage.addEvent(event);
     }
 
     public void removeLike(int id, int userId) {
@@ -193,16 +193,20 @@ public class FilmService {
 
         userStorage.getUser(userId).orElseThrow(() -> new NotFoundException("Пользователь не найден с ID: " + userId));
 
-        likeStorage.removeLike(id, userId);
+        Optional<Like> optionalLike = likeStorage.getLike(id, userId);
 
-        Event event = new Event();
-        event.setUserId(userId);
-        event.setEntityId(film.getId());
-        event.setType(EventType.LIKE);
-        event.setOperation(Operation.REMOVE);
-        event.setTimestamp(Instant.now().toEpochMilli());
+        if (optionalLike.isPresent()) {
+            likeStorage.removeLike(id, userId);
 
-        feedStorage.addEvent(event);
+            Event event = new Event();
+            event.setUserId(userId);
+            event.setEntityId(film.getId());
+            event.setType(EventType.LIKE);
+            event.setOperation(Operation.REMOVE);
+            event.setTimestamp(Instant.now().toEpochMilli());
+
+            feedStorage.addEvent(event);
+        }
     }
 
     public Collection<FilmDto> getMostLikedFilms(int count, Integer genreId, Integer year) {
