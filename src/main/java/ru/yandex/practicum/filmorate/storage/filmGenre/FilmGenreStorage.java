@@ -1,5 +1,9 @@
 package ru.yandex.practicum.filmorate.storage.filmGenre;
 
+import java.util.List;
+
 public interface FilmGenreStorage {
-    void addFilmGenre(int filmId, int genreId);
+    void addFilmGenres(int filmId, List<Integer> genreIds);
+
+    void deleteGenresByFilmId(int filmId);
 }
