@@ -20,7 +20,7 @@ public class DirectorController {
     }
 
     @GetMapping("/{id}")
-    public DirectorDto getDirector(@PathVariable int id) {
+    public DirectorDto getDirector(@PathVariable Integer id) {
         return directorService.getDirector(id);
     }
 
@@ -35,7 +35,7 @@ public class DirectorController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteDirector(@PathVariable int id) {
+    public void deleteDirector(@PathVariable Integer id) {
         directorService.removeDirector(id);
     }
 }

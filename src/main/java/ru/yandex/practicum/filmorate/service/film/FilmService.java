@@ -37,7 +37,7 @@ public class FilmService {
         return filmStorage.getFilm(filmId).map(FilmMapper::mapToFilmDto).orElseThrow(() -> new NotFoundException("Фильм не найден с ID: " + filmId));
     }
 
-    public Film addFilm(Film film) {
+    public FilmDto addFilm(Film film) {
         List<Integer> mpas = mpaStorage.getRatings().stream().map(Mpa::getId).toList();
 
         if (!mpas.contains(film.getMpa().getId())) {
@@ -71,9 +71,7 @@ public class FilmService {
         if (filmGenres != null && !filmGenres.isEmpty()) {
             List<Integer> filmGenreIds = film.getGenres().stream().map(Genre::getId).toList();
 
-            for (Integer genreId : filmGenreIds) {
-                filmGenreStorage.addFilmGenre(film.getId(), genreId);
-            }
+            filmGenreStorage.addFilmGenres(film.getId(), filmGenreIds);
         }
 
         List<Director> filmDirectors = film.getDirectors();
@@ -88,15 +86,13 @@ public class FilmService {
                 }
             }
 
-            for (Integer directorId : filmDirectorIds) {
-                filmDirectorStorage.addFilmDirector(film.getId(), directorId);
-            }
+            filmDirectorStorage.addFilmDirectors(film.getId(), filmDirectorIds);
         }
 
-        return result;
+        return FilmMapper.mapToFilmDto(result);
     }
 
-    public Film updateFilm(Film film) {
+    public FilmDto updateFilm(Film film) {
         List<Integer> mpas = mpaStorage.getRatings().stream().map(Mpa::getId).toList();
 
         if (!mpas.contains(film.getMpa().getId())) {
@@ -141,9 +137,7 @@ public class FilmService {
         if (filmGenres != null) {
             if (!filmGenres.isEmpty()) {
                 List<Integer> filmGenreIds = film.getGenres().stream().map(Genre::getId).toList();
-                for (Integer genreId : filmGenreIds) {
-                    filmGenreStorage.addFilmGenre(film.getId(), genreId);
-                }
+                filmGenreStorage.addFilmGenres(film.getId(), filmGenreIds);
             }
         }
 
@@ -151,13 +145,11 @@ public class FilmService {
             filmDirectorStorage.deleteDirectorsByFilmId(film.getId());
             if (!film.getDirectors().isEmpty()) {
                 List<Integer> filmDirectorIds = film.getDirectors().stream().map(Director::getId).toList();
-                for (Integer directorId : filmDirectorIds) {
-                    filmDirectorStorage.addFilmDirector(film.getId(), directorId);
-                }
+                filmDirectorStorage.addFilmDirectors(film.getId(), filmDirectorIds);
             }
         }
 
-        return result;
+        return FilmMapper.mapToFilmDto(result);
     }
 
     public void removeFilm(int id) {
@@ -232,9 +224,11 @@ public class FilmService {
                 .collect(Collectors.toList());
     }
 
-    public List<Film> getFilmsByDirector(int directorId, String sortBy) {
+    public List<FilmDto> getFilmsByDirector(int directorId, String sortBy) {
         directorStorage.getDirector(directorId).orElseThrow(() -> new NotFoundException("Режиссёр не найден с ID: " + directorId));
-        return filmStorage.getFilmsByDirector(directorId, sortBy);
+        return filmStorage.getFilmsByDirector(directorId, sortBy).stream()
+                .map(FilmMapper::mapToFilmDto)
+                .collect(Collectors.toList());
     }
 
     public Collection<FilmDto> searchFilms(String query, String by) {

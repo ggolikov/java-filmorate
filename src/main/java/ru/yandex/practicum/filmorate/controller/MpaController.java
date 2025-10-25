@@ -20,7 +20,7 @@ public class MpaController {
     private final MpaService mpaService;
 
     @GetMapping("/{id}")
-    public MpaDto getRating(@PathVariable int id) {
+    public MpaDto getRating(@PathVariable Integer id) {
         return mpaService.getRating(id);
     }
 

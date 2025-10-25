@@ -19,7 +19,7 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/{userId}")
-    public UserDto getUser(@PathVariable int userId) {
+    public UserDto getUser(@PathVariable Integer userId) {
         return userService.getUser(userId);
     }
 
@@ -34,7 +34,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteUser(@PathVariable int id) {
+    public void deleteUser(@PathVariable Integer id) {
         userService.removeUser(id);
     }
 
@@ -44,32 +44,32 @@ public class UserController {
     }
 
     @PutMapping("/{id}/friends/{friendId}")
-    public void addFriend(@PathVariable int id, @PathVariable int friendId) {
+    public void addFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
         userService.addFriend(id, friendId);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
-    public void removeFriend(@PathVariable int id, @PathVariable int friendId) {
+    public void removeFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
         userService.removeFriend(id, friendId);
     }
 
     @GetMapping("/{id}/friends")
-    public Collection<User> getFriends(@PathVariable int id) {
+    public Collection<User> getFriends(@PathVariable Integer id) {
         return userService.getFriends(id);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
-    public Collection<User> getCommonFriends(@PathVariable int id, @PathVariable int otherId) {
+    public Collection<User> getCommonFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
         return userService.getCommonFriends(id, otherId);
     }
 
     @GetMapping("/{id}/feed")
-    public Collection<EventDto> getFeed(@PathVariable int id) {
+    public Collection<EventDto> getFeed(@PathVariable Integer id) {
         return userService.getFeed(id);
     }
 
     @GetMapping("/{id}/recommendations")
-    public Collection<FilmDto> getRecommendations(@PathVariable int id) {
+    public Collection<FilmDto> getRecommendations(@PathVariable Integer id) {
         return userService.getRecommendations(id);
     }
 }

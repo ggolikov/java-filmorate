@@ -5,7 +5,7 @@ import ru.yandex.practicum.filmorate.model.Director;
 import java.util.List;
 
 public interface FilmDirectorStorage {
-    void addFilmDirector(int filmId, int directorId);
+    void addFilmDirectors(int filmId, List<Integer> directorIds);
 
     void deleteDirectorsByFilmId(int filmId);
 

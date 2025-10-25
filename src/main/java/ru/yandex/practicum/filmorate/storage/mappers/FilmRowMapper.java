@@ -7,7 +7,6 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
-import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -30,14 +29,11 @@ public class FilmRowMapper implements RowMapper<Film> {
         mpa.setName(rs.getString("mpa_name"));
         film.setMpa(mpa);
 
-        Array genreIdsArray = rs.getArray("genre_ids");
-        Array genreNamesArray = rs.getArray("genre_names");
+        Object[] genreIds = (Object[]) rs.getArray("genre_ids").getArray();
+        Object[] genreNames = (Object[]) rs.getArray("genre_names").getArray();
         List<Genre> genres = new ArrayList<>();
 
-        if (genreIdsArray != null && genreNamesArray != null) {
-            Object[] genreIds = (Object[]) genreIdsArray.getArray();
-            Object[] genreNames = (Object[]) genreNamesArray.getArray();
-
+        if (genreIds != null && genreNames != null) {
             for (int i = 0; i < genreIds.length; i++) {
                 if (genreIds[i] != null && genreNames[i] != null) {
                     Genre genre = new Genre();
@@ -49,14 +45,11 @@ public class FilmRowMapper implements RowMapper<Film> {
         }
         film.setGenres(genres);
 
-        Array directorIdsArray = rs.getArray("director_ids");
-        Array directorNamesArray = rs.getArray("director_names");
+        Object[] directorIds = (Object[]) rs.getArray("director_ids").getArray();
+        Object[] directorNames = (Object[]) rs.getArray("director_names").getArray();
         List<Director> directors = new ArrayList<>();
 
-        if (directorIdsArray != null && directorNamesArray != null) {
-            Object[] directorIds = (Object[]) directorIdsArray.getArray();
-            Object[] directorNames = (Object[]) directorNamesArray.getArray();
-
+        if (directorIds != null && directorNames != null) {
             for (int i = 0; i < directorIds.length; i++) {
                 if (directorIds[i] != null && directorNames[i] != null) {
                     Director director = new Director();
